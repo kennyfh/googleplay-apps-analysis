@@ -3,6 +3,7 @@
 -- cómo instalarla con cabal.
 -- Para la superación del trabajo, el código debe ser programación funcional y contener
 -- como mínimo, de forma natural:
+
 -- • Dos usos de cada concepto básico de programación funcional visto en la asignatura. Es
 -- decir: al menos usar 2 funciones básicas de prelude y Data.List, definir 2 funciones
 -- recursivas, definir 2 funciones por patrones, 2 usos de guardas, 2 usos de case of, 2 usos
@@ -14,5 +15,63 @@
 -- ejemplo, pilas, colas, map, matrix, array).
 
 
+-- Librerias usadas
+import Text.CSV -- Implementación de csv en Haskell
+import Data.Default -- Librería que nos permite instanciar la clase Default
+
+-- Creamos un nuevo tipo de datos, que corresponderá a los valores que tenga nuestro dataset
+data Dataset = Data {
+    app::String, category::String, rating::String, reviews::Int, size::String, installs::Int,
+    typeprice::String, price::Float, contentrating::String, genres::String, lastupdated::String,
+    currentversion::String, androidver:: String
+
+} deriving (Show, Eq)
+
+-- Hemos creado una instancia para tener valores por defecto en el caso de que falten campos en el dataset
+instance Default Dataset where
+    def =  Data {
+    app=def, category=def, rating=def, reviews=def, size=def, installs=def,
+    typeprice=def, price=def, contentrating=def, genres=def, lastupdated=def,
+    currentversion=def, androidver=def
+    }
+
+
+-- 1º Problema: Como tratar rating, Float o Integer? Esto es debido a que aunque la mayoría de los elementos de la
+-- zona de Rating son numeros reales, pero hay algunos que aparecen con la etiqueta NaN, como se van a tratar?
+-- Por el momento los dejaré como String.
+
+-- 2º Problema: Price convertilo a String, o Lo ponemos como Float, le quitamos el $ y se lo ponemos cuando haga falta?
+
+-- INVESTIGACIÓN DEL MERCADO UTILIZANDO ANALISIS ESTADÍSTICOS EN UN DATASET DE APLICACIONES DE GOOGLE PLAY
+
+--- METODOS QUE PODRIAMOS IMPLEMENTAR
+-- 1) Numero de atributos que tiene nuestro dataset
+-- 2) Mostrar las categorías que nos encontramos en el dataset
+-- 3) 
+
+
+
+
 main :: IO()
-main =  putStrLn "Hello World"
+main =  do
+    -- Guardamos el nombre de nuestro dataset
+    let fileName = "googleplaystore.csv"
+    -- Analizamos nuestro fichero de entrada para ver si se trata
+    -- de un csv o no, dependiendo de ello lo trataremos de una manera u otra.
+    csv <- parseCSVFromFile fileName
+    -- La función parseCSVFromFile es de tipo Either Text.Parsec.Error.ParseError CSV
+    -- Por lo que si no hay error, devuelve (Right x), siendo x de tipo csv.
+
+    let filas = case csv of
+            -- En caso de que no hubiera ningún error, se nos devolvería todas las líneas
+            -- de nuestro fichero csv en una lista.
+            (Right lineas) -> lineas
+            -- En caso contrario, devolvemos []
+            _ -> []
+
+    let x = head filas
+    putStrLn (show $ length x)
+    putStrLn "Hey"      
+
+
+
