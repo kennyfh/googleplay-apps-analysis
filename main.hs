@@ -40,6 +40,7 @@ data Rating = NaN | (Number::Int) deriving
 -- 1º Problema: Como tratar rating, Float o String? Esto es debido a que aunque la mayoría de los elementos de la
 -- zona de Rating son numeros reales, pero hay algunos que aparecen con la etiqueta NaN, como se van a tratar?
 -- Por el momento los dejaré como String.
+    -- Posible solución: Usar un Maybe Int
 
 -- 2º Problema: Price convertilo a String, o Lo ponemos como Float, le quitamos el $ y se lo ponemos cuando haga falta?
     -- Solución, ponerlo como float pero antes quitarle el $
