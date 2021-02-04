@@ -76,25 +76,28 @@ main =  do
     let filas = case csv of
             -- En caso de que no hubiera ningún error, se nos devolvería todas las líneas
             -- de nuestro fichero csv en una lista.
-            (Right lineas) -> lineas
+            (Right lineas) -> lineas -- [Record]
             -- En caso contrario, devolvemos []
             _ -> []
 
     if null filas then
         putStrLn "El fichero CSV no es válido o carece de contenido"
     else do -- significa que es un fichero valido 
-        let cabecera = head filas -- Cabecera del fichero CSV
-        let cuerpo = tail filas -- Filas con información del CSV -- [Field]
+        let cabecera = head filas -- Cabecera del fichero CSV -- 
+        let cuerpo = tail filas -- Filas con información del CSV
         putStrLn "Atributos de cada aplicación \n"
         imprimeAtributos cabecera
-        -- procesacampos cuerpo
-        -- procesaContenido cuerpo
+        let asd2 = take 1 $ imprimeAtributos2 cuerpo
+        imprimeAtributos3 asd2
 
-imprimeAtributos :: [String] -> IO()
+imprimeAtributos :: Record -> IO()
 imprimeAtributos xs = sequence_ $ map (\ (x,y) -> putStrLn $ concat $ [show x," : ",y]) (zip [1..] xs)
 
-pasaALista :: Field -> [String]
-pasaALista cadena = read cadena::[String]
+imprimeAtributos2 :: [Record] -> [String]
+imprimeAtributos2 xs = [show x | x<-xs]
+
+imprimeAtributos3 :: [String] -> IO()
+imprimeAtributos3 xs = sequence_ $ map (\ (x,y) -> putStrLn $ concat $ [show x," : ",y]) (zip [1..] xs)
 
 
-
+-- ["a","b","c"] - strings
