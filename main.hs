@@ -86,18 +86,15 @@ main =  do
         let cabecera = head filas -- Cabecera del fichero CSV -- 
         let cuerpo = tail filas -- Filas con información del CSV
         putStrLn "Atributos de cada aplicación \n"
-        imprimeAtributos cabecera
-        let asd2 = take 1 $ imprimeAtributos2 cuerpo
+        -- imprimeAtributos cabecera  -- Imprime la cabecera 
+        let asd2 = take 1 $ consiguealista cuerpo
         imprimeAtributos3 asd2
 
 imprimeAtributos :: Record -> IO()
 imprimeAtributos xs = sequence_ $ map (\ (x,y) -> putStrLn $ concat $ [show x," : ",y]) (zip [1..] xs)
 
-imprimeAtributos2 :: [Record] -> [String]
-imprimeAtributos2 xs = [show x | x<-xs]
+consiguealista :: [Record] -> [String]
+consiguealista xs = [show x | x<-xs]
 
 imprimeAtributos3 :: [String] -> IO()
 imprimeAtributos3 xs = sequence_ $ map (\ (x,y) -> putStrLn $ concat $ [show x," : ",y]) (zip [1..] xs)
-
-
--- ["a","b","c"] - strings
