@@ -1,4 +1,4 @@
--- 1 : ["Photo Editor & Candy Camera & Grid & ScrapBook","ART_AND_DESIGN","4.1","159","19M","10,000+","Free","0","Everyone","Art & Design","January 7, 2018","1.0.0","4.0.3 and up"]
+-- ["Photo Editor & Candy Camera & Grid & ScrapBook","ART_AND_DESIGN","4.1","159","19M","10,000+","Free","0","Everyone","Art & Design","January 7, 2018","1.0.0","4.0.3 and up"]
 -- 2 : ["Coloring book moana","ART_AND_DESIGN","3.9","967","14M","500,000+","Free","0","Everyone","Art & Design;Pretend Play","January 15, 2018","2.0.0","4.0.3 and up"]
 -- 3 : ["U Launcher Lite \8211 FREE Live Cool Themes, Hide Apps","ART_AND_DESIGN","4.7","87510","8.7M","5,000,000+","Free","0","Everyone","Art & Design","August 1, 2018","1.2.4","4.0.3 and up"]
 
@@ -29,3 +29,5 @@ x = Baz2 1 "Haskell"     -- construct by declaration order, try ":t Baz2" in GHC
 y = Baz2 {bazName = "Curry", bazNumber = 2} -- construct by name
 
 ["app","category","rating","reviews", "size","installs","typeprice","price","contentrating","genres","lastupdated","currentversion","androidver"]
+ej3 :: [String] -> IO()
+ej3 xs = sequence_ $ map (\ (x,y) -> putStrLn $ concat $ [show x," : ",y]) (zip [1..] xs)
