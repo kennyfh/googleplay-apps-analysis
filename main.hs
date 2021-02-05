@@ -54,15 +54,6 @@ instance Default Aplication where
 type Aplications = [Aplication] -- lista de aplicaciones?? o creamos un nuevo tipo de datos?
 
 
-
--- INVESTIGACIÓN DEL MERCADO UTILIZANDO ANALISIS ESTADÍSTICOS EN UN DATASET DE APLICACIONES DE GOOGLE PLAY
-
---- METODOS QUE PODRIAMOS IMPLEMENTAR
--- 1) Numero de atributos que tiene nuestro dataset
--- 2) Mostrar las categorías que nos encontramos en el dataset
--- 3) 
-
-
 main :: IO()
 main =  do
     -- Guardamos el nombre de nuestro dataset
@@ -87,14 +78,62 @@ main =  do
         let cuerpo = tail filas -- Filas con información del CSV
         putStrLn "Atributos de cada aplicación \n"
         -- imprimeAtributos cabecera  -- Imprime la cabecera 
-        let asd2 = take 1 $ consiguealista cuerpo
-        imprimeAtributos3 asd2
+        -- let asd2 = consiguealista cabecera cuerpo -- Aplications
+        -- ej3 asd2
+        putStrLn "ASDASD"
 
 imprimeAtributos :: Record -> IO()
 imprimeAtributos xs = sequence_ $ map (\ (x,y) -> putStrLn $ concat $ [show x," : ",y]) (zip [1..] xs)
 
-consiguealista :: [Record] -> [String]
-consiguealista xs = [show x | x<-xs]
+consiguealista :: [String] -> [Record] -> [String] -- ARREGLAR
+consiguealista cabecera xs = [show x | x<-xs]
 
-imprimeAtributos3 :: [String] -> IO()
-imprimeAtributos3 xs = sequence_ $ map (\ (x,y) -> putStrLn $ concat $ [show x," : ",y]) (zip [1..] xs)
+ej3 :: [String] -> IO()
+ej3 xs = sequence_ $ map (\ (x,y) -> putStrLn $ concat $ [show x," : ",y]) (zip [1..] xs)
+
+--Función que traduzca un record a tipo Aplication
+traduccionRecord :: [String] -> Record -> Aplication -- [Photo Editor & Candy Camera & Grid & ScrapBook,ART_AND_DESIGN,4.1,159,19M,"10,000+",Free,0,Everyone,Art & Design,"January 7, 2018",1.0.0,4.0.3 and up]
+traduccionRecord cabecera xs = variable
+    where ts =  [(a,b) | (a,b) <- (zip cabecera xs)] -- [(app,photoeditor...), (Category,ART_AND_DESING).....]
+          variable = def {
+          app=(traduce ts "app"), category=(traduce ts "category"), rating=(traduceRating (traduce ts "rating")), reviews=(traduceReview (traduce ts "rating")),
+          size=(traduce ts "size"), installs=(traduceInstall (traduce ts "installs")),
+          typeprice=(traduce ts "typeprice"), price=(traducePrice (traduce ts "price")), contentrating=(traduce ts "contentrating"), genres=(traduce ts "genres"), lastupdated=(traduce ts "lastupdated"),
+          currentversion=(traduce ts "currentversion"), androidver=(traduce ts "androidver")
+          }
+
+--"\"Photo Editor & Candy Camera & Grid & ScrapBook\"" 
+
+traduce :: [(String,String)] -> String -> String
+traduce xs str = head [show b | (a,b)<-xs, a==str]
+
+
+-- Métodos Para parsear los elementos de tipo String al que nos piden en el tipo Aplication
+traduceRating :: String -> Maybe Float
+traduceRating str
+    | str=="NaN" = Nothing
+    | otherwise = Just $ read str :: Maybe Float
+
+traduceReview :: String -> Int 
+traduceReview str = read str :: Int
+
+traduceInstall :: String -> Int
+traduceInstall str = read (eliminarcoma $ init str) :: Int
+    where eliminarcoma str = filter (\x -> x/=',') str
+
+traducePrice :: String -> Float
+traducePrice str 
+        | (str == "0") = read str :: Float
+        | otherwise = read (tail str) :: Float
+
+-- funciones que vamos a necesitar
+-- 1) Función que traduzca un record a tipo Aplication
+-- 2) funcion que recorra un record
+-- 3) función que según la posición de un record nos devuelva su valor correspondiente
+    
+
+-- INVESTIGACIÓN DEL MERCADO UTILIZANDO ANALISIS ESTADÍSTICOS EN UN DATASET DE APLICACIONES DE GOOGLE PLAY
+
+--- METODOS QUE PODRIAMOS IMPLEMENTAR
+-- 1) Numero de atributos que tiene nuestro dataset
+-- 2) Mostrar las categorías que nos encontramos en el dataset
