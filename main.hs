@@ -18,9 +18,16 @@
 -}
 -- INVESTIGACIÓN DEL MERCADO UTILIZANDO ANALISIS ESTADÍSTICOS EN UN DATASET DE APLICACIONES DE GOOGLE PLAY
 
---- METODOS QUE PODRIAMOS IMPLEMENTAR
--- 1) Numero de atributos que tiene nuestro dataset
--- 2) Mostrar las categorías que nos encontramos en el dataset
+-- - METODOS QUE PODRIAMOS IMPLEMENTAR
+-- 1) Numero de atributos que tiene nuestro dataset (hecho)
+-- 2) Mostrar las categorías que nos encontramos en el dataset (hecho)
+-- 3) Calcular la media de las instalaciones por categoría
+-- 4) Calcular la media de del rating por categoría 
+-- 5) Porcentaje de cuantas aplicaciones son gratuita o de pago en google play
+
+
+
+
 
 
 -- =====================================================================
@@ -28,6 +35,7 @@
 import Text.CSV -- Implementación de csv en Haskell
 import Data.Default -- Librería que nos permite instanciar la clase Default
 -- import GHC.Generics
+import Data.List as L
 -- =====================================================================
 
 
@@ -81,9 +89,13 @@ main =  do
         let cabecera = head filas -- Cabecera del fichero CSV
         let cuerpo = tail filas -- Filas con información del CSV
         putStrLn "Atributos de cada aplicación \n"
-        imprimeCabecera cabecera  -- Imprime la cabecera 
+        imprimeCabecera cabecera  -- Imprime la cabecera = ["app","category","rating","reviews", "size","installs","typeprice","price","contentrating","genres","lastupdated","currentversion","androidver"]
         let aplications = traduccionRecords cabecera cuerpo
         -- putStrLn $ show aplications -- Muestra por consola la lista aplicaciones
+        let f =  funcion aplications
+        -- putStrLn $ show f
+        let f1 = funcion3 f
+        putStrLn $ show f1
         putStrLn " "
 -- =====================================================================
 
@@ -115,11 +127,9 @@ traduccionRecords cabecera xs = [traduccionRecord cabecera x | x<-xs]
 -- (traduccionRecord cabecera xs) dada una lista de Strings con la cabecera del csv y un Record,
 -- obtiene un tipo Aplication. Por ejemplo:
 
--- *Main> let cabecera = ["app","category","rating","reviews", "size","installs","typeprice","price"
--- ,"contentrating","genres","lastupdated","currentversion","androidver"]
+-- *Main> let cabecera = ["app","category","rating","reviews", "size","installs","typeprice","price","contentrating","genres","lastupdated","currentversion","androidver"]
 --
--- *Main> let xs = ["Photo Editor & Candy Camera & Grid & ScrapBook","ART_AND_DESIGN","4.1","159","19M",
--- "10,000+","Free","0","Everyone","Art & Design","January 7, 2018","1.0.0","4.0.3 and up"]::Record
+-- *Main> let xs = ["Photo Editor & Candy Camera & Grid & ScrapBook","ART_AND_DESIGN","4.1","159","19M","10,000+","Free","0","Everyone","Art & Design","January 7, 2018","1.0.0","4.0.3 and up"]::Record
 --
 -- *Main> traduccionRecord cabecera xs
 --
@@ -188,4 +198,31 @@ traducePrice str
         | otherwise = read (tail str) :: Float
 -- =====================================================================
 
+-- Calcular la media de las instalaciones por categoría
+-- App {app = "Photo Editor & Candy Camera & Grid & ScrapBook", category = "ART_AND_DESIGN", 
+-- rating = Just 4.1, reviews = 159, size = "19M", installs = 10000, typeprice = "Free", 
+-- price = 0.0, contentrating = "Everyone", genres = "Art & Design", lastupdated = "January 7, 2018",
+--  currentversion = "1.0.0", androidver = "4.0.3 and up"}
 
+
+-- funcion para conseguir las aplicaciones
+-- [("ART_AND_DESIGN",10000),("ART_AND_DESIGN",500000),("ART_AND_DESIGN",5000000),("ART_AND_DESIGN",50000000),("ART_AND_DESIGN",100000)]
+funcion :: Aplications -> [(String,Int)]
+funcion (app:apps)
+    | null apps = [(category app, installs app)]
+    | otherwise = [(category app, installs app)] ++ (funcion apps)
+
+-- dada una categoría y una lista de tuplas, nos devuelve el número de instalaciones que hemos hecho
+funcion2 :: String -> [(String,Int)] -> Int
+funcion2 c ((a,b):tuplas)
+    | null tuplas = x
+    | otherwise = x + (funcion2 c tuplas)
+    where x = if (c==a) then b else 0 -- Si pertenece a la categoría devolvemos su valor, si no 0
+
+--
+-- let tuplas = [("ART_AND_DESIGN",80),("AUTO_AND_VEHICLES",90),("BUSINESS",99),("AUTO_AND_VEHICLES",110),("COMICS",10)]
+-- funcion3 :: [(String,Int)] -> [(String,Int)]
+funcion3 tuplas = [(c,funcion2 c tuplas) | c<-categorias]
+    where categorias = L.nub [a | (a,b)<-tuplas]
+
+-- función que haga los porcentajes las categorías respecto a las instalaciones totales
