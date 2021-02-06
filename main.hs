@@ -21,11 +21,10 @@
 -- - METODOS QUE PODRIAMOS IMPLEMENTAR
 -- 1) Numero de atributos que tiene nuestro dataset (hecho)
 -- 2) Mostrar las categorías que nos encontramos en el dataset (hecho)
--- 3) Calcular la media de las instalaciones por categoría
+-- 3) Calcular la media de las instalaciones por categoría (hecho)
 -- 4) Calcular la media de del rating por categoría 
--- 5) Porcentaje de cuantas aplicaciones son gratuita o de pago en google play
-
-
+-- 5) Porcentaje de cuantas aplicaciones son gratuita o de pago en google play (hecho)
+-- 6 )
 
 
 
@@ -36,6 +35,7 @@ import Text.CSV -- Implementación de csv en Haskell
 import Data.Default -- Librería que nos permite instanciar la clase Default
 -- import GHC.Generics
 import Data.List as L
+import Data.Ord (comparing)
 -- =====================================================================
 
 
@@ -92,10 +92,13 @@ main =  do
         imprimeCabecera cabecera  -- Imprime la cabecera = ["app","category","rating","reviews", "size","installs","typeprice","price","contentrating","genres","lastupdated","currentversion","androidver"]
         let aplications = traduccionRecords cabecera cuerpo
         -- putStrLn $ show aplications -- Muestra por consola la lista aplicaciones
-        let f =  funcion aplications
-        -- putStrLn $ show f
-        let f1 = funcion3 f
-        putStrLn $ show f1
+        ---
+        putStrLn "\n"
+        putStrLn "Las 5 categorías con mayor número de instalaciones de todas:"
+        let porcentajeCat = masPorcentaje5Categorias $ porcentajeCategorias $ listarCategorias $ obtieneLCategorias aplications
+        imprMasPorcentaje5Categorias porcentajeCat
+        ---
+    
         putStrLn " "
 -- =====================================================================
 
@@ -199,30 +202,92 @@ traducePrice str
 -- =====================================================================
 
 -- Calcular la media de las instalaciones por categoría
--- App {app = "Photo Editor & Candy Camera & Grid & ScrapBook", category = "ART_AND_DESIGN", 
--- rating = Just 4.1, reviews = 159, size = "19M", installs = 10000, typeprice = "Free", 
--- price = 0.0, contentrating = "Everyone", genres = "Art & Design", lastupdated = "January 7, 2018",
---  currentversion = "1.0.0", androidver = "4.0.3 and up"}
-
-
--- funcion para conseguir las aplicaciones
--- [("ART_AND_DESIGN",10000),("ART_AND_DESIGN",500000),("ART_AND_DESIGN",5000000),("ART_AND_DESIGN",50000000),("ART_AND_DESIGN",100000)]
-funcion :: Aplications -> [(String,Int)]
-funcion (app:apps)
+-- =====================================================================
+-- (obtieneLCategorias apps) Dada una lista de aplicaciones devuelve una lista de tuplas
+-- donde la primera componente es la categoría donde se encuentra la aplicación y la segunda componente
+-- es el numero de instalaciones de dicha aplicación 
+obtieneLCategorias :: Aplications -> [(String,Int)]
+obtieneLCategorias (app:apps)
     | null apps = [(category app, installs app)]
-    | otherwise = [(category app, installs app)] ++ (funcion apps)
+    | otherwise = [(category app, installs app)] ++ (obtieneLCategorias apps)
 
--- dada una categoría y una lista de tuplas, nos devuelve el número de instalaciones que hemos hecho
-funcion2 :: String -> [(String,Int)] -> Int
-funcion2 c ((a,b):tuplas)
+-- Esto devolvería algo así: [("ART_AND_DESIGN",80),("AUTO_AND_VEHICLES",90),("BUSINESS",99),("AUTO_AND_VEHICLES",110),("COMICS",10)]
+-- =====================================================================
+
+-- (obtenerInsPCategoria c tuplas) Dada una categoría y una lista de tuplas, nos devuelve el número de instalaciones
+-- de la categoría que le hemos dado como parámetro. Por ejemplo:
+--  let c =  "ART_AND_DESIGN"
+--  let tuplas = [("ART_AND_DESIGN",80),("AUTO_AND_VEHICLES",90),("BUSINESS",99),("AUTO_AND_VEHICLES",110),("COMICS",10)]
+--  
+--              obtenerInsPCategoria c tuplas == 80
+
+obtenerInsPCategoria :: String -> [(String,Int)] -> Int
+obtenerInsPCategoria c ((a,b):tuplas)
     | null tuplas = x
-    | otherwise = x + (funcion2 c tuplas)
+    | otherwise = x + (obtenerInsPCategoria c tuplas)
     where x = if (c==a) then b else 0 -- Si pertenece a la categoría devolvemos su valor, si no 0
+-- =====================================================================
 
---
+
+-- (listarCategorias) Dada una lista de tuplas, lo que hace es devolverte una lista con el numero 
+-- total de instalaciones por categoría. Por ejemplo:
 -- let tuplas = [("ART_AND_DESIGN",80),("AUTO_AND_VEHICLES",90),("BUSINESS",99),("AUTO_AND_VEHICLES",110),("COMICS",10)]
--- funcion3 :: [(String,Int)] -> [(String,Int)]
-funcion3 tuplas = [(c,funcion2 c tuplas) | c<-categorias]
+
+--      listarCategorias tuplas == [("ART_AND_DESIGN",80),("AUTO_AND_VEHICLES",200),("BUSINESS",99),("COMICS",10)]
+listarCategorias :: [(String,Int)] -> [(String,Int)]
+listarCategorias tuplas = [(c,obtenerInsPCategoria c tuplas) | c<-categorias]
     where categorias = L.nub [a | (a,b)<-tuplas]
 
--- función que haga los porcentajes las categorías respecto a las instalaciones totales
+-- (porcentajeCategorias tuplas) función que haga los porcentajes las categorías respecto a las instalaciones totales. Por ejemplo:
+-- let tuplas = [("ART_AND_DESIGN",80),("AUTO_AND_VEHICLES",90),("BUSINESS",99),("AUTO_AND_VEHICLES",110),("COMICS",10)]
+
+        -- porcentajeCategorias tuplas == [("ART_AND_DESIGN",20.565552),("AUTO_AND_VEHICLES",23.136248),("BUSINESS",25.449871),("AUTO_AND_VEHICLES",28.277636),("COMICS",2.570694)]
+
+porcentajeCategorias :: [(String,Int)] -> [(String, Float)]
+porcentajeCategorias tuplas = map (\(a,b) -> (a, (fromIntegral (b*100) / fromIntegral total))) tuplas
+    where total = sum [b | (a,b) <- tuplas]
+
+
+-- (masPorcentaje5Categorias) Funcion que haga que nos devuelva las 5 categorias con más porcentaje
+masPorcentaje5Categorias :: [(String, Float)] -> [(String, Float)]
+masPorcentaje5Categorias tuplas= take 5 $ reverse $ sortBy (comparing (\(x,y) -> y)) tuplas
+
+-- (imprMasPorcentaje5Categorias tuplas) Muestra por pantalla la categoría con su porcentaje
+
+imprMasPorcentaje5Categorias :: [(String, Float)] -> IO()
+imprMasPorcentaje5Categorias tuplas= sequence_ $ map (\ (a,b) -> putStrLn $ concat $ [show a, " : ", show b, "%"]) tuplas
+
+
+-- =====================================================================
+-- Porcentaje de cuantas aplicaciones son gratuita o de pago en google play
+-- Devuelve una [Float] con los precios del DataSet
+listarPrecios :: Aplications -> [Float]
+listarPrecios (app:apps)
+    | null apps = [price app]
+    | otherwise = [price app] ++ listarPrecios (apps)
+
+--Calcula la cantidad de aplicaciones que son de pago.
+cantAppsPago :: [Float] -> Int
+cantAppsPago (x:xs)
+    | null xs = res
+    | otherwise = res + (cantAppsPago xs)
+    where res = if x/=0.0 then 1 else 0
+
+--Calcula el porcentaje de aplicaciones de pago respecto al total
+porcAppsPago :: [Float]-> Int -> String
+porcAppsPago xs a = "El "++res++"% de la aplicaciones del DataSet son de pago."
+        where res =show ((a * 100) `div`length xs) 
+
+-- Precio Medio de las aplicaciones de pago en el DataSet
+precMedioAplicaciones :: [Float] -> [Char]
+precMedioAplicaciones xs = "El Precio medio de las aplicaciones de pago es: "++show(res)
+        where res = sumPrecioAppsPago xs / fromIntegral (cantAppsPago xs)
+
+-- Suma de todos los precios de aplicaciones de pago
+sumPrecioAppsPago :: [Float] -> Float
+sumPrecioAppsPago (x:xs)
+    | null xs = res
+    | otherwise = res + (sumPrecioAppsPago xs)
+    where res = if x/=0.0 then x else 0
+-- =====================================================================
+    

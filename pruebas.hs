@@ -25,3 +25,12 @@ x = Baz2 1 "Haskell"     -- construct by declaration order, try ":t Baz2" in GHC
 y = Baz2 {bazName = "Curry", bazNumber = 2} -- construct by name
 
 -- ["app","category","rating","reviews", "size","installs","typeprice","price","contentrating","genres","lastupdated","currentversion","androidver"]
+
+
+-- let f =  obtieneLCategorias aplications
+        -- putStrLn $ show f
+        -- let f1 = listarCategorias f
+        -- putStrLn $ show f1
+        -- let f2 =  porcentajeCategorias f1
+        -- putStrLn $ show f2
+        -- let f3 =  masPorcentaje5Categorias f2
