@@ -22,9 +22,8 @@
 -- 1) Numero de atributos que tiene nuestro dataset (hecho)
 -- 2) Mostrar las categorías que nos encontramos en el dataset (hecho)
 -- 3) Calcular la media de las instalaciones por categoría (hecho)
--- 4) Calcular la media de del rating por categoría 
+-- 4) Calcular las 5 aplicaciones con mejor valoración por categoría
 -- 5) Porcentaje de cuantas aplicaciones son gratuita o de pago en google play (hecho)
--- 6 )
 
 
 
@@ -33,9 +32,9 @@
 -- MODULOS UTILIZADAS
 import Text.CSV -- Implementación de csv en Haskell
 import Data.Default -- Librería que nos permite instanciar la clase Default
--- import GHC.Generics
 import Data.List as L
 import Data.Ord (comparing)
+import Data.Maybe
 -- =====================================================================
 
 
@@ -69,7 +68,7 @@ type Aplications = [Aplication] -- Lista de Aplicaciones
 main :: IO()
 main =  do
     -- Guardamos el nombre de nuestro dataset
-    let fileName = "googleplaystore.csv"
+    let fileName = "ejemplos/googleplaystore.csv"
     -- Analizamos nuestro fichero de entrada para ver si se trata
     -- de un csv o no, dependiendo de ello lo trataremos de una manera u otra.
     csv <- parseCSVFromFile fileName
@@ -92,13 +91,23 @@ main =  do
         imprimeCabecera cabecera  -- Imprime la cabecera = ["app","category","rating","reviews", "size","installs","typeprice","price","contentrating","genres","lastupdated","currentversion","androidver"]
         let aplications = traduccionRecords cabecera cuerpo
         -- putStrLn $ show aplications -- Muestra por consola la lista aplicaciones
-        ---
+        ------------------------------------------------
         putStrLn "\n"
         putStrLn "Las 5 categorías con mayor número de instalaciones de todas:"
         let porcentajeCat = masPorcentaje5Categorias $ porcentajeCategorias $ listarCategorias $ obtieneLCategorias aplications
         imprMasPorcentaje5Categorias porcentajeCat
+        ------------------------------------
+        putStrLn "\n"
+        let f1 = [(app x, show(installs x)++"+") | x<-appsMasInstalls aplications]
+        putStrLn $ show f1
+        ------------------------------------
+        ------------------------------------
+        ------------------------------------
         ---
-    
+        -- let lcat = obtieneLCatPRating aplications
+        -- putStrLn $ show lcat
+        -- listarRating lcat
+        -- putStrLn $ show prueba
         putStrLn " "
 -- =====================================================================
 
@@ -210,6 +219,7 @@ obtieneLCategorias :: Aplications -> [(String,Int)]
 obtieneLCategorias (app:apps)
     | null apps = [(category app, installs app)]
     | otherwise = [(category app, installs app)] ++ (obtieneLCategorias apps)
+-- obtieneLCategorias apps = foldl (\acc x -> acc ++ [(category x, installs x)]) [] apps -- + lento
 
 -- Esto devolvería algo así: [("ART_AND_DESIGN",80),("AUTO_AND_VEHICLES",90),("BUSINESS",99),("AUTO_AND_VEHICLES",110),("COMICS",10)]
 -- =====================================================================
@@ -227,7 +237,7 @@ obtenerInsPCategoria c ((a,b):tuplas)
     | otherwise = x + (obtenerInsPCategoria c tuplas)
     where x = if (c==a) then b else 0 -- Si pertenece a la categoría devolvemos su valor, si no 0
 -- =====================================================================
-
+-- =====================================================================
 
 -- (listarCategorias) Dada una lista de tuplas, lo que hace es devolverte una lista con el numero 
 -- total de instalaciones por categoría. Por ejemplo:
@@ -237,6 +247,8 @@ obtenerInsPCategoria c ((a,b):tuplas)
 listarCategorias :: [(String,Int)] -> [(String,Int)]
 listarCategorias tuplas = [(c,obtenerInsPCategoria c tuplas) | c<-categorias]
     where categorias = L.nub [a | (a,b)<-tuplas]
+-- =====================================================================
+-- =====================================================================
 
 -- (porcentajeCategorias tuplas) función que haga los porcentajes las categorías respecto a las instalaciones totales. Por ejemplo:
 -- let tuplas = [("ART_AND_DESIGN",80),("AUTO_AND_VEHICLES",90),("BUSINESS",99),("AUTO_AND_VEHICLES",110),("COMICS",10)]
@@ -246,20 +258,25 @@ listarCategorias tuplas = [(c,obtenerInsPCategoria c tuplas) | c<-categorias]
 porcentajeCategorias :: [(String,Int)] -> [(String, Float)]
 porcentajeCategorias tuplas = map (\(a,b) -> (a, (fromIntegral (b*100) / fromIntegral total))) tuplas
     where total = sum [b | (a,b) <- tuplas]
-
+-- =====================================================================
+-- =====================================================================
 
 -- (masPorcentaje5Categorias) Funcion que haga que nos devuelva las 5 categorias con más porcentaje
 masPorcentaje5Categorias :: [(String, Float)] -> [(String, Float)]
 masPorcentaje5Categorias tuplas= take 5 $ reverse $ sortBy (comparing (\(x,y) -> y)) tuplas
+-- =====================================================================
+-- =====================================================================
 
 -- (imprMasPorcentaje5Categorias tuplas) Muestra por pantalla la categoría con su porcentaje
 
 imprMasPorcentaje5Categorias :: [(String, Float)] -> IO()
 imprMasPorcentaje5Categorias tuplas= sequence_ $ map (\ (a,b) -> putStrLn $ concat $ [show a, " : ", show b, "%"]) tuplas
 
-
 -- =====================================================================
+
 -- Porcentaje de cuantas aplicaciones son gratuita o de pago en google play
+
+--Calcula la cantidad de aplicaciones que son de pago.
 -- Devuelve una [Float] con los precios del DataSet
 listarPrecios :: Aplications -> [Float]
 listarPrecios (app:apps)
@@ -276,7 +293,7 @@ cantAppsPago (x:xs)
 --Calcula el porcentaje de aplicaciones de pago respecto al total
 porcAppsPago :: [Float]-> Int -> String
 porcAppsPago xs a = "El "++res++"% de la aplicaciones del DataSet son de pago."
-        where res =show ((a * 100) `div`length xs) 
+        where res =show ((a * 100) `div`length xs)
 
 -- Precio Medio de las aplicaciones de pago en el DataSet
 precMedioAplicaciones :: [Float] -> [Char]
@@ -289,5 +306,70 @@ sumPrecioAppsPago (x:xs)
     | null xs = res
     | otherwise = res + (sumPrecioAppsPago xs)
     where res = if x/=0.0 then x else 0
+
+-- sumPrecioAppsPago' :: [Float] -> Float
+-- sumPrecioAppsPago' xs = sum $ filter (/=0) xs   
 -- =====================================================================
-    
+-- =====================================================================
+-- Aplicación con más rewiews
+
+appMasReviews :: Aplications -> Aplication
+appMasReviews (app:apps)
+    | null apps = app
+    | otherwise = res
+    where aux = appMasReviews apps
+          res = if reviews app > reviews aux then app else aux
+
+-- Aplicación con más intalls (Aunque hay varias)
+
+appMasinstalls :: Aplications -> Aplication
+appMasinstalls (app:apps)
+    | null apps = app
+    | otherwise = res
+    where aux = appMasinstalls apps
+          res = if installs app > installs aux then app else aux
+
+
+-- [Aplicaciones] con más installs (Se puede hacer con menos cálculos añadiendo en la cabecera las líneas de calculo anteriores)
+appsMasInstalls :: Aplications -> Aplications
+appsMasInstalls (app:apps)
+    | null apps = [app]
+    | otherwise = res ++ appsMasInstalls apps
+    where   xs = app : apps
+            aux = appMasinstalls xs
+            aux1 = installs aux
+            res = [app | installs app ==  aux1]
+
+appsMasInstalls' :: Aplications -> Aplication -> Aplications
+appsMasInstalls' (app:apps) appAux
+    | null apps = [app]
+    | otherwise = res ++ appsMasInstalls apps
+    where  res = [app | installs app == installs appAux]
+
+-- =====================================================================
+-- =====================================================================
+-- Calcular las 5 aplicaciones con mejor valoración por categoría
+
+-- Funcion que obtiene una lista de tuplas compuestas por el nombre de la aplicación, su categoría y 
+-- el rating que tiene
+obtieneLCatPRating :: Aplications -> [(String,String,Maybe Float)]
+obtieneLCatPRating apps = foldl (\acc x -> acc ++ [(app x, category x,rating x)]) [] apps
+
+
+-- Funcion que dada una categoría y una lista de tuplas, te devuelve una lista con los 5 valores
+obtieneRating :: String -> [(String,String,Maybe Float)] -> [(String,Maybe Float)]
+obtieneRating cat tuplas =  take 5 $ reverse $ sortBy (comparing (\(x,y) -> y)) $ map (\(a,b,c) -> (a,c)) $ filter (\(a,b,c) -> isJust c && cat==b) tuplas
+
+
+-- -- listarRating :: [(String,String,Maybe Float)] -> IO()
+-- listarRating tuplas = [imprimeprueba cat (obtieneRating cat tuplas) | cat<-categorias]
+--     where categorias = L.nub [b | (a,b,c)<-tuplas] -- nos devuelve las categorías
+
+-- impr :: [(String,Maybe Float)] -> IO()
+-- impr tuplas= sequence_ $ map (\ (a,b) -> putStrLn $ concat $ [show a, " : ", show b]) tuplas
+
+-- imprimeprueba :: String -> [(String,Maybe Float)] -> IO()
+-- imprimeprueba cat tuplas =  do
+--     putStrLn cat
+--     impr tuplas
+--     putStrLn "-----------------------"
