@@ -108,14 +108,26 @@ main =  do
         ------------------------------------
         ------------------------------------
         ------------------------------------
-        let x = appMasReviews aplications
-        putStrLn $ show x
-
+        -- let x = appMasReviews aplications
+        -- putStrLn $ show x
+        ------------------------------------
         ---
-        -- let lcat = obtieneLCatPRating aplications
+
+        putStrLn "\n"
+        putStrLn "5 de las aplicaciones con más descargas: \n"
+        let f1 = take 5[(app x, show(installs x)++"+") | x<-appsMasInstalls aplications]
+        imprMasInstalls f1
+        ------------------------------------
+        ------------------------------------
+        ------------------------------------
+        putStrLn "\n"
+        putStrLn "Aplicación con más Reviews: \n"
+        let x = appMasReviews aplications
+        imprAPP x
+        ---------
+        let lcat = listarRating $ obtieneLCatPRating aplications
+        imprimirlistar lcat
         -- putStrLn $ show lcat
-        -- listarRating lcat
-        -- putStrLn $ show prueba
         putStrLn " "
 -- =====================================================================
 
@@ -348,16 +360,7 @@ appsMasInstalls (app:apps)
             aux1 = installs aux
             res = [app | installs app ==  aux1]
 
--- appsMasInstalls2 :: Aplications -> []
--- appsMasInstalls2 acc (app:apps)
---     | null apps = acc
---     | otherwise = 
 
--- appsMasInstalls' :: Aplications -> Aplication -> Aplications
--- appsMasInstalls' (app:apps) appAux
---     | null apps = [app]
---     | otherwise = res ++ appsMasInstalls apps
---     where  res = [app | installs app == installs appAux]
 
 -- =====================================================================
 -- =====================================================================
@@ -371,20 +374,34 @@ obtieneLCatPRating :: Aplications -> [(String,String,Maybe Float)]
 obtieneLCatPRating apps = foldl (\acc x -> acc ++ [(app x, category x,rating x)]) [] apps
 
 
--- Funcion que dada una categoría y una lista de tuplas, te devuelve una lista con los 5 valores
-obtieneRating :: String -> [(String,String,Maybe Float)] -> [(String,Maybe Float)]
-obtieneRating cat tuplas =  take 5 $ reverse $ sortBy (comparing (\(x,y) -> y)) $ map (\(a,b,c) -> (a,c)) $ filter (\(a,b,c) -> isJust c && cat==b) tuplas
+-- Funcion que dada una categoría y una lista de tuplas, te devuelve una lista con los 1 valores
+obtieneRating :: String -> [(String,String,Maybe Float)] -> [(String,String,Maybe Float)]
+obtieneRating cat tuplas =  take 1 $ reverse $ sortBy (comparing (\(x,y,z) -> y)) $ filter (\(a,b,c) -> isJust c && cat==b) tuplas
+-- obtieneRating :: String -> [(String,String,Maybe Float)] -> [(String,Maybe Float)]
+-- obtieneRating cat tuplas =  take 5 $ reverse $ sortBy (comparing (\(x,y) -> y)) $ map (\(a,b,c) -> (a,c)) $ filter (\(a,b,c) -> isJust c && cat==b) tuplas
 
 
--- -- listarRating :: [(String,String,Maybe Float)] -> IO()
--- listarRating tuplas = [imprimeprueba cat (obtieneRating cat tuplas) | cat<-categorias]
---     where categorias = L.nub [b | (a,b,c)<-tuplas] -- nos devuelve las categorías
+listarRating :: [(String,String,Maybe Float)] -> [(String,String,Maybe Float)] 
+listarRating tuplas = concat [(obtieneRating cat tuplas) | cat<-categorias]
+    where categorias = L.nub [b | (a,b,c)<-tuplas] -- nos devuelve las categorías
 
--- impr :: [(String,Maybe Float)] -> IO()
--- impr tuplas= sequence_ $ map (\ (a,b) -> putStrLn $ concat $ [show a, " : ", show b]) tuplas
+imprimirlistar :: [(String,String,Maybe Float)] -> IO()
+-- imprimirlistar lista = mapM_ print lista
+imprimirlistar lista = mapM_ (\ (a,b,c) -> putStrLn $ concat $ ["app: ", a,"      " , "Categoria: ", b,"   " , "Puntuacion: ",show $ fromJust c]) lista
 
--- imprimeprueba :: String -> [(String,Maybe Float)] -> IO()
--- imprimeprueba cat tuplas =  do
---     putStrLn cat
---     impr tuplas
---     putStrLn "-----------------------"
+
+-- Formato de impresión de la lista de aplicaciones con más descargas
+imprMasInstalls :: [(String, String)] -> IO()
+imprMasInstalls = mapM_ (\ (a,b) -> putStrLn $ concat $ [a, " : ", b])
+
+-- Formato de impresión de una APP
+imprAPP :: Aplication -> IO()
+imprAPP x = putStrLn res
+    where res = if typeprice x == "Free" then
+                        concat ["Nombre: ",app x, "\n", "Categoría: ", category x,"\n",
+                        "Rating: ",show(fromJust (rating x)), "\n", "Reviews: ",show(reviews x), "\n",
+                        "Installs: ",show(installs x), "+ \n", "Precio: ",typeprice x]
+                        else
+                         concat ["Nombre: ",app x, "\n", "Categoría: ", category x,"\n",
+                        "Rating: ", show(fromJust (rating x)) , "\n", "Reviews: ",show(reviews x), "\n",
+                        "Installs: ",show(installs x), "+ \n", "Precio: ",show(price x)]
