@@ -31,8 +31,30 @@
 -- 10) Calcular la media de del rating por categoría. (Hecho)
 -- 11) Calcular la media de las instalaciones por categoría 
 
-
-
+module Aplication
+    (Aplication,
+    Aplications,
+    imprimeCabecera,
+    traduccionRecords,
+    masPorcentaje5Categorias,
+    porcentajeCategorias,
+    listarCategorias,
+    obtieneLCategorias,
+    imprMasPorcentaje5Categorias,
+    listarPrecios,
+    appsMasInstalls,
+    imprMasInstalls,
+    appMasReviews,
+    listarRating,
+    obtieneLCatPRating,
+    imprimirTablaRting,
+    listarMediaCat,
+    imprimeMediaCat,
+    cantAppsPago,
+    imprAPP,
+    porcAppsPago,
+    precMedioAplicaciones
+    ) where
 -- =====================================================================
 -- MODULOS UTILIZADAS
 import Text.CSV -- Implementación de csv en Haskell
@@ -458,17 +480,23 @@ imprimirTablaRting lista = putStrLn $ render $ P.table tabla
 filtrarRatingCat :: String -> [(String,String,Maybe Float)] -> [(String, String, Maybe Float)]
 filtrarRatingCat cat tuplas = filter (\(a,b,c) -> isJust c && cat==b) tuplas
 
+-- (obtenerMediaCat cat tuplas) Dada una categoría y una lista de aplicaciones con esa categoría,
+-- devuelves una categoría con la media de todos los rating
 obtenerMediaCat :: String -> [(String, String, Maybe Float)] -> (String,Float)
 obtenerMediaCat cat tuplas = (cat,media)
         where ls = filtrarRatingCat cat tuplas
               xs = [fromJust c | (a,b,c)<-ls]
               media = sum xs / (fromIntegral $ length xs)
 
-
+-- (listarMediaCat tuplas) Devuelve la media de todas las aplicaciones de cada categoría
 listarMediaCat :: [(String,String,Maybe Float)] -> [(String, Float)] 
 listarMediaCat tuplas =  [(obtenerMediaCat cat tuplas) | cat<-categorias] -- Si en obtieneRating devolvemos una [(String,String,Maybe Float)] tenemos que añadir concat [(obtieneRating.....]
     where categorias = L.nub [b | (a,b,c)<-tuplas] -- nos devuelve las categorías
 
+-- (imprimeMediaCat tuplas) Muestra por pantalla cada categoría con la media del rating en forma de tabla
 imprimeMediaCat :: [(String, Float)] -> IO()
 imprimeMediaCat tuplas = putStrLn $ render $ P.table tabla
     where tabla = ["Categoria","Media Rating"]:[[a,show b] | (a,b)<-tuplas]
+
+--------
+-- Calcular la media de las instalaciones por categoría

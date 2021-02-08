@@ -14,6 +14,28 @@
 -- traduceRating str
 --     | str=="NaN" = Nothing
 --     | otherwise = Just $ read str :: Maybe Float
+-- module Aplication
+--     (Aplication,
+--     Aplications,
+--     imprimeCabecera,
+--     traduccionRecords,
+--     masPorcentaje5Categorias,
+--     porcentajeCategorias,
+--     listarCategorias,
+--     obtieneLCategorias,
+--     imprMasPorcentaje5Categorias,
+--     listarPrecios,
+--     appsMasInstalls,
+--     imprMasInstalls,
+--     appMasReviews,
+--     listarRating,
+--     obtieneLCatPRating,
+--     imprimirTablaRting,
+--     listarMediaCat,
+--     imprimeMediaCat
+--     ) where
+
+
 
 data Foo2 = Bar2 | Baz2 {bazNumber::Int, bazName::String} deriving (Show)
 
@@ -37,3 +59,7 @@ y = Baz2 {bazName = "Curry", bazNumber = 2} -- construct by name
 
 
 
+aaa x = case x of 
+             "1" ->  "A"
+             "2" ->  "B"
+             "3" ->  "C"
