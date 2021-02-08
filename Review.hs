@@ -89,10 +89,15 @@ main =  do
         putStrLn "Atributos de cada aplicación \n"
         imprimeCabecera cabecera  -- Imprime la cabecera = ["app","translated_Review","sentiment","sentiment_Polarity","sentiment_Subjectivity"]
         let reviews = traduccionRecords cabecera cuerpo
-        putStrLn $ show reviews -- Muestra por consola la lista aplicaciones
+        -- putStrLn $ show reviews -- Muestra por consola la lista aplicaciones
         ------------------------------------------------
         --let f1 = [(app x, show(installs x)++"+") | x<-appsMasInstalls aplications]
         --putStrLn $ show f1
+        ------------------------------------------------
+        putStrLn "\n "
+        porcVal reviews "Positive"
+        porcVal reviews "Neutral"
+        porcVal reviews "Negative"
         putStrLn " "
 -- =====================================================================
 imprimeCabecera :: Record -> IO()
@@ -132,3 +137,17 @@ traduce xs str = head [b | (a,b)<-xs, a==str]
 
 traducesent :: String -> Float
 traducesent str = read str :: Float
+
+
+-- porcValoraciones :: Reviews -> String -> Int
+numVal :: [Review] -> String -> Int
+numVal (x:xs) a
+        | null xs = res
+        | otherwise = res + numVal xs a
+        where res = if sentiment x == a then  1 else 0
+
+porcVal :: Reviews ->  String -> IO()
+porcVal xs "" = putStrLn "Debe añadir un elemento tras la lista de Reviews dadas"
+porcVal xs "Positive" =  putStrLn $ "El " ++ show (fromIntegral $ numVal xs "Positive" * 100 `div` length xs ) ++ "% son reviews positivas"
+porcVal xs "Neutral" = putStrLn $ "El " ++ show (fromIntegral $ numVal xs "Neutral" * 100 `div` length xs ) ++ "% son reviews Neutrales"
+porcVal xs "Negative" = putStrLn $ "El " ++ show (fromIntegral $ numVal xs "Negative" * 100 `div` length xs ) ++ "% son reviews Negativas"

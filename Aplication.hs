@@ -24,12 +24,12 @@
 -- 3) Calcular la media de las instalaciones por categoría (hecho)
 -- 4) Calcular las 5 aplicaciones con mejor valoración por categoría
 -- 5) Porcentaje de cuantas aplicaciones son gratuita o de pago en google play (hecho)
--- 8) Aplicaciones con más descargas (Hecho, tarda casi 1,10 min)
--- 7) Aplicación con más Installs(No es concreto debido a que hay varias con más de 1 millón) (Hecho)
--- 6) Aplicación con más rewiews (Hecho)
--- 5) Porcentaje de cuantas aplicaciones son gratuita o de pago en google play (Hecho)
--- 4) Calcular la media de del rating por categoría 
--- 3) Calcular la media de las instalaciones por categoría
+-- 6) Aplicaciones con más descargas (Hecho, tarda casi 1,10 min)
+-- 7) Aplicación con más Installs (No es concreto debido a que hay varias con más de 1 millón) (Hecho)
+-- 8) Aplicación con más rewiews (Hecho)
+-- 9) Porcentaje de cuantas aplicaciones son gratuita o de pago en google play (Hecho)
+-- 10) Calcular la media de del rating por categoría. (Hecho)
+-- 11) Calcular la media de las instalaciones por categoría 
 
 
 
@@ -40,6 +40,9 @@ import Data.Default -- Librería que nos permite instanciar la clase Default
 import Data.List as L
 import Data.Ord (comparing)
 import Data.Maybe
+import Text.PrettyPrint.Boxes
+import PTables as P
+
 -- =====================================================================
 
 
@@ -102,33 +105,35 @@ main =  do
         let porcentajeCat = masPorcentaje5Categorias $ porcentajeCategorias $ listarCategorias $ obtieneLCategorias aplications
         imprMasPorcentaje5Categorias porcentajeCat
         ------------------------------------
-        -- putStrLn "\n"
-        -- let f1 = [(app x, show(installs x)++"+") | x<-appsMasInstalls aplications]
-        -- putStrLn $ show f1
+        putStrLn "\n"
+        let lPrecios = listarPrecios aplications --[Float]
+        porcAppsPago lPrecios (cantAppsPago lPrecios)
+        precMedioAplicaciones lPrecios
         ------------------------------------
-        ------------------------------------
-        ------------------------------------
-        -- let x = appMasReviews aplications
-        -- putStrLn $ show x
-        ------------------------------------
-        ---
-
         putStrLn "\n"
         putStrLn "5 de las aplicaciones con más descargas: \n"
         let f1 = take 5[(app x, show(installs x)++"+") | x<-appsMasInstalls aplications]
         imprMasInstalls f1
         ------------------------------------
         ------------------------------------
-        ------------------------------------
         putStrLn "\n"
         putStrLn "Aplicación con más Reviews: \n"
         let x = appMasReviews aplications
         imprAPP x
-        ---------
+        ------------------------------------
+        ------------------------------------
+        putStrLn "\n"
+        putStrLn "La aplicación con mayor rating por categoría: "
         let lcat = listarRating $ obtieneLCatPRating aplications
-        imprimirlistar lcat
-        -- putStrLn $ show lcat
+        imprimirTablaRting lcat
+        ------------------------------------
+        putStrLn "\n Calcular la media de del rating por categoría:"
+        let lcatR = obtieneLCatPRating aplications -- obtieneLCatPRating
+        let mediasCat = listarMediaCat lcatR
+        imprimeMediaCat mediasCat
+        ------------------------------------
         putStrLn " "
+
 -- =====================================================================
 
 
@@ -142,6 +147,7 @@ main =  do
 -- 2 : category
 -- 3 : rating
 -- 4 : reviews
+
 imprimeCabecera :: Record -> IO()
 imprimeCabecera xs = sequence_ $ map (\ (x,y) -> putStrLn $ concat $ [show x," : ",y]) (zip [1..] xs)
 -- =====================================================================
@@ -293,34 +299,44 @@ imprMasPorcentaje5Categorias :: [(String, Float)] -> IO()
 imprMasPorcentaje5Categorias tuplas= sequence_ $ map (\ (a,b) -> putStrLn $ concat $ [show a, " : ", show b, "%"]) tuplas
 
 -- =====================================================================
-
 -- Porcentaje de cuantas aplicaciones son gratuita o de pago en google play
-
---Calcula la cantidad de aplicaciones que son de pago.
--- Devuelve una [Float] con los precios del DataSet
+-- =====================================================================
+-- (listarPrecios apps) Calcula la cantidad de aplicaciones que son de pago o gratis.
+--  Devuelve una [Float] con los precios del DataSet
 listarPrecios :: Aplications -> [Float]
 listarPrecios (app:apps)
     | null apps = [price app]
     | otherwise = [price app] ++ listarPrecios (apps)
+-- =====================================================================
+-- =====================================================================
+-- (cantAppsPago xs) Calcula la cantidad de aplicaciones que son de pago.
+-- Por ejemplo:
+-- let xs = [2.3,1.2,0.0,1.2]::[Float]
 
---Calcula la cantidad de aplicaciones que son de pago.
+         -- cantAppsPago xs == 3
 cantAppsPago :: [Float] -> Int
 cantAppsPago (x:xs)
     | null xs = res
     | otherwise = res + (cantAppsPago xs)
     where res = if x/=0.0 then 1 else 0
+-- =====================================================================
+-- =====================================================================
 
---Calcula el porcentaje de aplicaciones de pago respecto al total
-porcAppsPago :: [Float]-> Int -> String
-porcAppsPago xs a = "El "++res++"% de la aplicaciones del DataSet son de pago."
-        where res =show ((a * 100) `div`length xs)
+-- (porcAppsPago xs a) Calcula el porcentaje de aplicaciones de pago respecto al total.
+porcAppsPago :: [Float]-> Int -> IO()
+porcAppsPago xs a = putStrLn ("El "++res++"% de la aplicaciones del DataSet son de pago.")
+        where res =show ((a * 100) `div` length xs)
+-- =====================================================================
+-- =====================================================================
 
--- Precio Medio de las aplicaciones de pago en el DataSet
-precMedioAplicaciones :: [Float] -> [Char]
-precMedioAplicaciones xs = "El Precio medio de las aplicaciones de pago es: "++show(res)
+-- (precMedioAplicaciones xs) Precio Medio de las aplicaciones de pago en el DataSet
+precMedioAplicaciones :: [Float] -> IO()
+precMedioAplicaciones xs = putStrLn ("El Precio medio de las aplicaciones de pago es: $"++show(res))
         where res = sumPrecioAppsPago xs / fromIntegral (cantAppsPago xs)
+-- =====================================================================
+-- =====================================================================
 
--- Suma de todos los precios de aplicaciones de pago
+-- (sumPrecioAppsPago xs) Suma de todos los precios de aplicaciones de pago
 sumPrecioAppsPago :: [Float] -> Float
 sumPrecioAppsPago (x:xs)
     | null xs = res
@@ -331,16 +347,18 @@ sumPrecioAppsPago (x:xs)
 -- sumPrecioAppsPago' xs = sum $ filter (/=0) xs   
 -- =====================================================================
 -- =====================================================================
--- Aplicación con más rewiews
 
+-- (appMasReviews apps) Aplicación con más rewiews dada una lista de aplicaciones
 appMasReviews :: Aplications -> Aplication
 appMasReviews (app:apps)
     | null apps = app
     | otherwise = res
     where aux = appMasReviews apps
           res = if reviews app > reviews aux then app else aux
+-- =====================================================================
+-- =====================================================================
 
--- Aplicación con más intalls (Aunque hay varias)
+-- (appMasinstalls apps) Aplicación con más intalls (Aunque hay varias)
 
 appMasinstalls :: Aplications -> Aplication
 appMasinstalls (app:apps)
@@ -349,8 +367,10 @@ appMasinstalls (app:apps)
     where aux = appMasinstalls apps
           res = if installs app > installs aux then app else aux
 
+-- =====================================================================
+-- =====================================================================
 
--- [Aplicaciones] con más installs (Se puede hacer con menos cálculos añadiendo en la cabecera las líneas de calculo anteriores)
+-- (appsMasInstalls apps) [Aplicaciones] con más installs (Se puede hacer con menos cálculos añadiendo en la cabecera las líneas de calculo anteriores)
 appsMasInstalls :: Aplications -> Aplications
 appsMasInstalls (app:apps)
     | null apps = res
@@ -360,41 +380,17 @@ appsMasInstalls (app:apps)
             aux1 = installs aux
             res = [app | installs app ==  aux1]
 
-
-
 -- =====================================================================
 -- =====================================================================
-
-
--- Calcular las 5 aplicaciones con mejor valoración por categoría
-
--- Funcion que obtiene una lista de tuplas compuestas por el nombre de la aplicación, su categoría y 
--- el rating que tiene
-obtieneLCatPRating :: Aplications -> [(String,String,Maybe Float)]
-obtieneLCatPRating apps = foldl (\acc x -> acc ++ [(app x, category x,rating x)]) [] apps
-
-
--- Funcion que dada una categoría y una lista de tuplas, te devuelve una lista con los 1 valores
-obtieneRating :: String -> [(String,String,Maybe Float)] -> [(String,String,Maybe Float)]
-obtieneRating cat tuplas =  take 1 $ reverse $ sortBy (comparing (\(x,y,z) -> y)) $ filter (\(a,b,c) -> isJust c && cat==b) tuplas
--- obtieneRating :: String -> [(String,String,Maybe Float)] -> [(String,Maybe Float)]
--- obtieneRating cat tuplas =  take 5 $ reverse $ sortBy (comparing (\(x,y) -> y)) $ map (\(a,b,c) -> (a,c)) $ filter (\(a,b,c) -> isJust c && cat==b) tuplas
-
-
-listarRating :: [(String,String,Maybe Float)] -> [(String,String,Maybe Float)] 
-listarRating tuplas = concat [(obtieneRating cat tuplas) | cat<-categorias]
-    where categorias = L.nub [b | (a,b,c)<-tuplas] -- nos devuelve las categorías
-
-imprimirlistar :: [(String,String,Maybe Float)] -> IO()
--- imprimirlistar lista = mapM_ print lista
-imprimirlistar lista = mapM_ (\ (a,b,c) -> putStrLn $ concat $ ["app: ", a,"      " , "Categoria: ", b,"   " , "Puntuacion: ",show $ fromJust c]) lista
-
-
--- Formato de impresión de la lista de aplicaciones con más descargas
+   
+-- (imprMasInstalls) Formato de impresión de la lista de aplicaciones con más descargas
 imprMasInstalls :: [(String, String)] -> IO()
 imprMasInstalls = mapM_ (\ (a,b) -> putStrLn $ concat $ [a, " : ", b])
 
--- Formato de impresión de una APP
+-- =====================================================================
+-- =====================================================================
+
+-- (imprAPP app) Formato de impresión de una APP
 imprAPP :: Aplication -> IO()
 imprAPP x = putStrLn res
     where res = if typeprice x == "Free" then
@@ -405,3 +401,74 @@ imprAPP x = putStrLn res
                          concat ["Nombre: ",app x, "\n", "Categoría: ", category x,"\n",
                         "Rating: ", show(fromJust (rating x)) , "\n", "Reviews: ",show(reviews x), "\n",
                         "Installs: ",show(installs x), "+ \n", "Precio: ",show(price x)]
+
+-- =====================================================================
+-- =====================================================================
+-- Calcular la aplicación con mejor valoración por categoría
+
+-- Funcion que obtiene una lista de tuplas compuestas por el nombre de la aplicación, su categoría y 
+-- el rating que tiene
+obtieneLCatPRating :: Aplications -> [(String,String,Maybe Float)]
+obtieneLCatPRating apps = foldl (\acc x -> acc ++ [(app x, category x,rating x)]) [] apps
+
+-- =====================================================================
+-- =====================================================================
+
+-- (obtieneRating cat tuplas) Dada una categoría y una lista de tuplas, te devuelve la aplicación con 
+-- mejor rating de cat.
+obtieneRating :: String -> [(String,String,Maybe Float)] -> (String,String,Maybe Float)
+obtieneRating cat tuplas =  head $ reverse $ sortBy (comparing (\(x,y,z) -> y)) $ filter (\(a,b,c) -> isJust c && cat==b) tuplas
+-- obtieneRating :: String -> [(String,String,Maybe Float)] -> [(String,Maybe Float)]
+-- obtieneRating cat tuplas =  take 5 $ reverse $ sortBy (comparing (\(x,y) -> y)) $ map (\(a,b,c) -> (a,c)) $ filter (\(a,b,c) -> isJust c && cat==b) tuplas
+
+-- =====================================================================
+-- =====================================================================
+-- (listarRating tuplas) Nos devuelve una lista con la aplicación con mejor rating por cada categoría.
+
+listarRating :: [(String,String,Maybe Float)] -> [(String,String,Maybe Float)] 
+listarRating tuplas =  [(obtieneRating cat tuplas) | cat<-categorias] -- Si en obtieneRating devolvemos una [(String,String,Maybe Float)] tenemos que añadir concat [(obtieneRating.....]
+    where categorias = L.nub [b | (a,b,c)<-tuplas] -- nos devuelve las categorías
+
+-- =====================================================================
+-- =====================================================================
+-- (imprimirTablaRting xs) Dada una lista de tuplas de (app,categoria,rating), imprime una tabla utilizando 
+-- el módulo boxes. Por ejemplo:
+-- let xs = [("app1",  "cat1", Just 1.9),("app2",  "cat2", Just 2.9)]    
+
+    -- (imprimirTablaRting xs) ==    +----------+---------+------+
+                            --   |Aplicacion|Categoria|Rating|
+                            --   +----------+---------+------+
+                            --   |app1      |cat1     |1.9   |
+                            --   +----------+---------+------+
+                            --   |app2      |cat2     |2.9   |
+                            --   +----------+---------+------+
+
+imprimirTablaRting :: [(String,String,Maybe Float)] -> IO()
+-- imprimirTablaRting lista = mapM_ print lista
+-- imprimirTablaRting lista = mapM_ (\ (a,b,c) -> putStrLn $ concat $ ["app: ", a,"      " , "Categoria: ", b,"   " , "Puntuacion: ",show $ fromJust c]) lista
+imprimirTablaRting lista = putStrLn $ render $ P.table tabla
+    where tabla = ["Aplicacion", "Categoria", "Rating"]:[[a,b,show $ fromJust c] | (a,b,c)<-lista]
+-- =====================================================================
+-- =====================================================================
+
+-- Calcular la media de del rating por categoría.
+
+-- (filtrarRatingCat) Dada una categoría y una lista de tuplas, nos devuelve una lista con todas las aplicaciones
+-- que tienen esa categoria
+filtrarRatingCat :: String -> [(String,String,Maybe Float)] -> [(String, String, Maybe Float)]
+filtrarRatingCat cat tuplas = filter (\(a,b,c) -> isJust c && cat==b) tuplas
+
+obtenerMediaCat :: String -> [(String, String, Maybe Float)] -> (String,Float)
+obtenerMediaCat cat tuplas = (cat,media)
+        where ls = filtrarRatingCat cat tuplas
+              xs = [fromJust c | (a,b,c)<-ls]
+              media = sum xs / (fromIntegral $ length xs)
+
+
+listarMediaCat :: [(String,String,Maybe Float)] -> [(String, Float)] 
+listarMediaCat tuplas =  [(obtenerMediaCat cat tuplas) | cat<-categorias] -- Si en obtieneRating devolvemos una [(String,String,Maybe Float)] tenemos que añadir concat [(obtieneRating.....]
+    where categorias = L.nub [b | (a,b,c)<-tuplas] -- nos devuelve las categorías
+
+imprimeMediaCat :: [(String, Float)] -> IO()
+imprimeMediaCat tuplas = putStrLn $ render $ P.table tabla
+    where tabla = ["Categoria","Media Rating"]:[[a,show b] | (a,b)<-tuplas]

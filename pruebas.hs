@@ -34,3 +34,6 @@ y = Baz2 {bazName = "Curry", bazNumber = 2} -- construct by name
         -- let f2 =  porcentajeCategorias f1
         -- putStrLn $ show f2
         -- let f3 =  masPorcentaje5Categorias f2
+
+
+
