@@ -63,10 +63,10 @@ appsdataset =  do
         A.porcAppsPago lPrecios (A.cantAppsPago lPrecios)
         A.precMedioAplicaciones lPrecios
         ------------------------------------
-        -- putStrLn "\n"
-        -- putStrLn "5 de las aplicaciones con más descargas: \n"
-        -- let f1 = take 5[(A.app x, show(A.installs x)++"+") | x<- A.appsMasInstalls aplications]
-        -- A.imprMasInstalls f1
+        putStrLn "\n"
+        putStrLn "5 de las aplicaciones con más descargas: \n"
+        let f1 = take 5 $ A.appsMasInstalls aplications
+        A.imprMasInstalls f1
         ------------------------------------
         ------------------------------------
         putStrLn "\n"
@@ -85,9 +85,14 @@ appsdataset =  do
         let mediasCat = A.listarMediaCat lcatR
         A.imprimeMediaCat mediasCat
         ------------------------------------
+        putStrLn "\n"
+        putStrLn "Tests:"
+        let x1 = A.listarCategorias $ A.obtieneLPCategorias aplications
+        let x2 = A.listarCategorias $ A.obtieneLCategorias aplications
+        let x3 = A.medInsPCat x2 x1
+        putStrLn "\n"
+        A.imprInsPCategorias x3
         putStrLn " "
-
-
 
 
 -- MAIN
@@ -116,9 +121,11 @@ reviewsdataset =  do
         putStrLn "Atributos de cada aplicación \n"
         R.imprimeCabecera cabecera  -- Imprime la cabecera = ["app","translated_Review","sentiment","sentiment_Polarity","sentiment_Subjectivity"]
         let reviews = R.traduccionRecords cabecera cuerpo
-        -- putStrLn $ show reviews -- Muestra por consola la lista aplicaciones
-        ------------------------------------------------
-        --let f1 = [(app x, show(installs x)++"+") | x<-appsMasInstalls aplications]
-        --putStrLn $ show f1
+        --------------------------------------------
+        putStrLn "\n "
+        putStrLn "Cantidad de review segun una evaluación:" 
+        R.porcVal reviews "Positive"
+        R.porcVal reviews "Neutral"
+        R.porcVal reviews "Negative"
         putStrLn " "
-
+        --------------------------------------------

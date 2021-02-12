@@ -28,7 +28,8 @@ module Review
     traduccionRecords,
     traduccionRecord,
     traduce,
-    traducesent
+    traducesent,
+    porcVal
     ) where
 
 -- =====================================================================

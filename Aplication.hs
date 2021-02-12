@@ -53,8 +53,12 @@ module Aplication
     cantAppsPago,
     imprAPP,
     porcAppsPago,
-    precMedioAplicaciones
+    precMedioAplicaciones,
+    obtieneLPCategorias,
+    medInsPCat,
+    imprInsPCategorias
     ) where
+
 -- =====================================================================
 -- MODULOS UTILIZADAS
 import Text.CSV -- Implementación de csv en Haskell
@@ -132,10 +136,10 @@ main =  do
         porcAppsPago lPrecios (cantAppsPago lPrecios)
         precMedioAplicaciones lPrecios
         ------------------------------------
-        putStrLn "\n"
-        putStrLn "5 de las aplicaciones con más descargas: \n"
-        let f1 = take 5[(app x, show(installs x)++"+") | x<-appsMasInstalls aplications]
-        imprMasInstalls f1
+        -- putStrLn "\n"
+        -- putStrLn "5 de las aplicaciones con más descargas: \n"
+        -- let f1 = take 5[(app x, show(installs x)++"+") | x<-appsMasInstalls aplications]
+        -- imprMasInstalls f1
         ------------------------------------
         ------------------------------------
         putStrLn "\n"
@@ -153,6 +157,14 @@ main =  do
         let lcatR = obtieneLCatPRating aplications -- obtieneLCatPRating
         let mediasCat = listarMediaCat lcatR
         imprimeMediaCat mediasCat
+        ------------------------------------
+        putStrLn "\n"
+        putStrLn "Tests:"
+        let x1 = listarCategorias $ obtieneLPCategorias aplications
+        let x2 = listarCategorias $ obtieneLCategorias aplications
+        let x3 = medInsPCat x2 x1
+        putStrLn "\n"
+        imprInsPCategorias x3
         ------------------------------------
         putStrLn " "
 
@@ -393,15 +405,14 @@ appMasinstalls (app:apps)
 -- =====================================================================
 
 -- (appsMasInstalls apps) [Aplicaciones] con más installs (Se puede hacer con menos cálculos añadiendo en la cabecera las líneas de calculo anteriores)
-appsMasInstalls :: Aplications -> Aplications
-appsMasInstalls (app:apps)
+appsMasInstalls :: Aplications -> [(String,String)]
+appsMasInstalls (apu:apps)
     | null apps = res
     | otherwise = res ++ appsMasInstalls apps
-    where   xs = app : apps
+    where   xs = apu : apps
             aux = appMasinstalls xs
             aux1 = installs aux
-            res = [app | installs app ==  aux1]
-
+            res = [ (app apu , show (installs apu) ++ "+") | installs apu ==  aux1]
 -- =====================================================================
 -- =====================================================================
    
@@ -457,7 +468,7 @@ listarRating tuplas =  [(obtieneRating cat tuplas) | cat<-categorias] -- Si en o
 -- el módulo boxes. Por ejemplo:
 -- let xs = [("app1",  "cat1", Just 1.9),("app2",  "cat2", Just 2.9)]    
 
-    -- (imprimirTablaRting xs) ==    +----------+---------+------+
+ -- (imprimirTablaRting xs) ==   +----------+---------+------+
                             --   |Aplicacion|Categoria|Rating|
                             --   +----------+---------+------+
                             --   |app1      |cat1     |1.9   |
@@ -499,4 +510,28 @@ imprimeMediaCat tuplas = putStrLn $ render $ P.table tabla
     where tabla = ["Categoria","Media Rating"]:[[a,show b] | (a,b)<-tuplas]
 
 --------
--- Calcular la media de las instalaciones por categoría
+---------------------11) Calcular la media de las instalaciones por categoría 
+-- Obtiene las tuplas [(Categoría, 1)]
+obtieneLPCategorias :: Aplications -> [(String,Int)]
+obtieneLPCategorias (app:apps)
+    | null apps = [(category app, 1)]
+    | otherwise = [(category app, 1)] ++ (obtieneLPCategorias apps)
+
+-- Función que calcula la media con las dos listas de tuplas, devido a que vienen en el mismo orden simplemente comparamos
+-- si son iguales o no las categorías y trabajamos haciendo el cálculo, es importante el orden de las listas de entrada.
+medInsPCat :: [(String,Int)] -> [(String,Int)] -> [(String,Int)]
+medInsPCat ((a,b):t) ((c,d):h)
+        | (length t /= length h) = [("Error en la ejecución", 0)]
+        | null t = x
+        | otherwise = x ++ medInsPCat t h
+        where x = [(a,b`div`d) | a == c]
+
+imprInsPCategorias :: [(String, Int)] -> IO()
+-- imprInsPCategorias tuplas= sequence_ $ map (\ (a,b) -> putStrLn $ concat $ [show a, " : ", show b]) tuplas
+imprInsPCategorias tuplas = putStrLn $ render $ P.table tabla
+    where tabla = ["Categoria","Media Instalaciones"]:[[a,show b] | (a,b)<-tuplas]
+
+
+-- imprimeMediaCat :: [(String, Float)] -> IO()
+-- imprimeMediaCat tuplas = putStrLn $ render $ P.table tabla
+--     where tabla = ["Categoria","Media Rating"]:[[a,show b] | (a,b)<-tuplas]
