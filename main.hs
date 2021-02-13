@@ -8,6 +8,8 @@
 import Review as R
 import Aplication as A
 import Text.CSV
+import Data.Char
+
 
 
 -- MAIN
@@ -128,10 +130,12 @@ reviewsdataset =  do
         let cabecera = head filas -- Cabecera del fichero CSV
         let cuerpo = tail filas -- Filas con información del CSV
         putStrLn "Atributos de cada aplicación \n"
+        --1)
         R.imprimeCabecera cabecera  -- Imprime la cabecera = ["app","translated_Review","sentiment","sentiment_Polarity","sentiment_Subjectivity"]
         let reviews = R.traduccionRecords cabecera cuerpo
         -- putStrLn $ show reviews
         ---------------------
+        -- 2)
         putStrLn "\n "
         putStrLn "Cantidad de review segun una evaluación:" 
         R.porcVal reviews "Positive"
@@ -140,6 +144,34 @@ reviewsdataset =  do
         -- R.porcVal [] "Negative" --test
         -- R.porcVal  reviews "" -- test
         --------------------------------------------
-        let xs = R.obtenerReviews "Housing-Real Estate & Property" reviews
-        putStrLn $ show xs
+        -- 3)
+        putStrLn "\n "
+        -- Housing-Real Estate & Property --> Es el mejor para hacer pruebas por el número bajo de elementos que tiene
+        putStrLn "Por favor, introduzca un nombre de una aplicación (Por ejemplo: 11st, Adobe Acrobat Reader, Agar.io, etc)"
+        
+        nom <- getLine
+        let xs = R.obtenerReviews nom reviews
+        if (length xs ==0) then do
+            error "La aplicación no existe y/o no hay reviews sobre ella"
+        else do
+            putStrLn ("Lista de las reviews de la aplicación " ++ (show nom))
+            imprimirRTraduccion xs
         ---------------------
+        -- 4) 
+        putStrLn "\n "
+        putStrLn "Por favor, seleccione un comentario poniendo el número correspondiente"
+        numero<-getLine
+        if (esNumero numero) then do
+            let n =  read numero::Int
+            -- putStrLn $ show n
+            let xsa = R.seleccionarComentario n xs
+            -- putStrLn $ show xsa
+            let asd = R.pilaPorcentajes xsa
+            putStrLn $ show asd
+        else do
+            error "No se puede seleccionar un comentario con un número inválido"
+        
+
+-- FUNCIONES AUXILIARES:
+esNumero :: String -> Bool
+esNumero xs = all isDigit xs

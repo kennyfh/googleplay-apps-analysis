@@ -2,7 +2,7 @@
 -- 2 : ["Coloring book moana","ART_AND_DESIGN","3.9","967","14M","500,000+","Free","0","Everyone","Art & Design;Pretend Play","January 15, 2018","2.0.0","4.0.3 and up"]
 -- 3 : ["U Launcher Lite \8211 FREE Live Cool Themes, Hide Apps","ART_AND_DESIGN","4.7","87510","8.7M","5,000,000+","Free","0","Everyone","Art & Design","August 1, 2018","1.2.4","4.0.3 and up"]
 
-
+import Data.Char
 
 -- let app1 = def {app = (traduce xs "app"), category = (traduce xs "Category"), rating = traduceRating $ traduce xs "rating" }
 
@@ -56,3 +56,11 @@ y = Baz2 {bazName = "Curry", bazNumber = 2} -- construct by name
         -- let f2 =  porcentajeCategorias f1
         -- putStrLn $ show f2
         -- let f3 =  masPorcentaje5Categorias f2
+
+
+
+esNumero :: String -> Bool
+esNumero xs = case xs of
+        "" -> False
+        _ -> all isDigit xs
+        

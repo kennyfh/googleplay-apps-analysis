@@ -9,7 +9,8 @@
 -- - METODOS QUE PODRIAMOS IMPLEMENTAR
 -- 1) Numero de atributos que tiene nuestro dataset (hecho)
 -- 2) Cantidad de reviews según una evaluación (hecho)
--- 3) Devolver todas las reviews de una aplicación (str)
+-- 3) Devolver todas las reviews de una aplicación (hecho)
+-- 4) Devolver el porcentaje de caracteres usados en un comentario 
 
 module Review
     (Review,
@@ -20,7 +21,10 @@ module Review
     traduce,
     traducesent,
     porcVal,
-    obtenerReviews
+    obtenerReviews,
+    imprimirRTraduccion,
+    seleccionarComentario,
+    pilaPorcentajes
     ) where
 
 -- =====================================================================
@@ -30,6 +34,10 @@ import Data.Default -- Librería que nos permite instanciar la clase Default
 import Data.List as L
 import Data.Ord (comparing)
 import Data.Maybe
+import Data.Array
+import Data.Char
+import PilaConTipoDeDatoAlgebraico
+
 -- =====================================================================
 
 
@@ -135,13 +143,60 @@ porcVal xs _ = error "Las reviews solamente pueden ser Positive, Negative o Neut
 
 -- Review> [Rev {app = "PD", translated_Review = "GreatApp", sentiment = "Negative", sentiment_Polarity = -2.5e-2, sentiment_Subjectivity = 0.125}]
 
-obtenerReviews :: String -> Reviews -> Reviews
+obtenerReviews :: String -> Reviews -> [String]
 obtenerReviews str (r:rws)
     | null rws = f (app r) r
     | otherwise = (f (app r) r) ++ (obtenerReviews str rws)
     where f x r
-           | x==str = [r]
+           | x==str = [translated_Review r]
            | otherwise = []
 -- =====================================================================
 -- =====================================================================
+-- (imprimirRTraduccion xs) Dada una lista de comentarios de cierta aplicación, nos mostrará por pantalla
+-- todos los comentarios traducidos al inglés que tenga esa app
+imprimirRTraduccion :: [String] -> IO()
+imprimirRTraduccion xs = mapM_ (\ (a,b) -> putStrLn $ concat $ [show a, " : ", b]) comments
+    where comments = zip [1..] xs
 
+-- =====================================================================
+-- =====================================================================
+-- Selecciona el comentario según la posición que le indicas
+seleccionarComentario :: Int -> [String] -> String
+seleccionarComentario pos xs
+    | pos > (length xs) =  error "No se puede seleccionar un comentario con un número inválido"
+    | otherwise = xs !! (pos-1)
+
+-- =====================================================================
+-- =====================================================================
+-- (limpia c) Recibe un comentario y nos devuelve el mismo comentario pero
+-- eliminando todas los caracteres que no sean letras del alfabeto inglés,
+-- convertidas a minúsculas. Por ejemplo:
+--  limpia "I like eat delicious food. That's I'm cooking food myself, case \"10 Best Foods\" helps lot, also \"Best Before (Shelf Life)\""
+-- "ilikeeatdeliciousfoodthatsimcookingfoodmyselfcasebestfoodshelpslotalsobestbeforeshelflife"
+
+
+limpia :: String -> String
+limpia str = filter (\x -> elem x abcario) $ map (\x-> toLower x) str 
+  where abcario = ['a'..'z']
+
+-- =====================================================================
+-- =====================================================================
+pilaPorcentajes :: String -> Pila (Char, Float)
+pilaPorcentajes xs = foldr apila vacia asd
+    where asd = zip ['a'..'z'] (frecuenciasCadena xs)
+
+-- =====================================================================
+-- =====================================================================
+frecuenciasCadena :: String -> [Float]
+frecuenciasCadena xs = [porcentaje (ocurrencias x xs') n | x <- ['a'..'z']] 
+    where xs' = limpia xs
+          n = length (xs)
+
+-- =====================================================================
+-- =====================================================================
+ocurrencias :: Eq a => a -> [a] -> Int
+ocurrencias x xs = length [x' | x' <- xs, x == x']
+                                                  
+
+porcentaje :: Int -> Int -> Float
+porcentaje n m = (fromIntegral n / fromIntegral m) * 100
