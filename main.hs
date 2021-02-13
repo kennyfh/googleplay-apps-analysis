@@ -1,7 +1,13 @@
+-- Main
+-- Kenny Jesús Flores Huamán
+-- Jesús Pineda Marquez
+-- Universidad de Sevilla
+-- Sevilla, 1 febrero de 2021
+-- =====================================================================
+
 import Review as R
 import Aplication as A
 import Text.CSV
-
 
 
 -- MAIN
@@ -13,6 +19,8 @@ main = do
     x<-getLine
     opciones x
     
+
+-- (opciones op) Según el String (op) nos ejecuta las funciones que correspondan
 opciones :: String -> IO()
 opciones "1" = do
     appsdataset
@@ -96,7 +104,7 @@ appsdataset =  do
         putStrLn " "
 
 
--- MAIN
+
 reviewsdataset :: IO()
 reviewsdataset =  do
     -- Guardamos el nombre de nuestro dataset
@@ -122,12 +130,16 @@ reviewsdataset =  do
         putStrLn "Atributos de cada aplicación \n"
         R.imprimeCabecera cabecera  -- Imprime la cabecera = ["app","translated_Review","sentiment","sentiment_Polarity","sentiment_Subjectivity"]
         let reviews = R.traduccionRecords cabecera cuerpo
-        putStrLn $ show reviews
-        --------------------------------------------
+        -- putStrLn $ show reviews
+        ---------------------
         putStrLn "\n "
         putStrLn "Cantidad de review segun una evaluación:" 
         R.porcVal reviews "Positive"
         R.porcVal reviews "Neutral"
         R.porcVal reviews "Negative"
-        putStrLn " "
+        -- R.porcVal [] "Negative" --test
+        -- R.porcVal  reviews "" -- test
         --------------------------------------------
+        let xs = R.obtenerReviews "Housing-Real Estate & Property" reviews
+        putStrLn $ show xs
+        ---------------------

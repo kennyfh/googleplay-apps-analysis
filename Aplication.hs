@@ -1,21 +1,11 @@
--- Main
+-- Aplication
 -- Kenny Jesús Flores Huamán
 -- Jesús Pineda Marquez
 -- Universidad de Sevilla
 -- Sevilla, 1 febrero de 2021
 -- =====================================================================
 
-{- BORRAR AL FINAL
--- • Dos usos de cada concepto básico de programación funcional visto en la asignatura. Es
--- decir: al menos usar 2 funciones básicas de prelude y Data.List, definir 2 funciones
--- recursivas, definir 2 funciones por patrones, 2 usos de guardas, 2 usos de case of, 2 usos
--- de listas por comprensión, 2 usos de orden superior, declaraciones de tipos para todas las
--- funciones definidas, 2 usos de evaluación perezosa, etc.
--- • Creación de un módulo
--- • Creación de dos tipos de datos nuevos y usos de éstos.
--- • Uso de al menos dos de tipos de datos abstractos o librerías vistos en la asignatura (por
--- ejemplo, pilas, colas, map, matrix, array).
--}
+
 -- INVESTIGACIÓN DEL MERCADO UTILIZANDO ANALISIS ESTADÍSTICOS EN UN DATASET DE APLICACIONES DE GOOGLE PLAY
 
 -- - METODOS QUE PODRIAMOS IMPLEMENTAR
@@ -29,7 +19,7 @@
 -- 8) Aplicación con más rewiews (Hecho)
 -- 9) Porcentaje de cuantas aplicaciones son gratuita o de pago en google play (Hecho)
 -- 10) Calcular la media de del rating por categoría. (Hecho)
--- 11) Calcular la media de las instalaciones por categoría 
+-- 11) Calcular la media de las instalaciones por categoría (hecho)
 
 module Aplication
     (Aplication,
@@ -97,81 +87,7 @@ instance Default Aplication where
 type Aplications = [Aplication] -- Lista de Aplicaciones
 -- =====================================================================
 
--- =====================================================================
--- MAIN
-main :: IO()
-main =  do
-    -- Guardamos el nombre de nuestro dataset
-    let fileName = "ejemplos/googleplaystore.csv"
-    -- Analizamos nuestro fichero de entrada para ver si se trata
-    -- de un csv o no, dependiendo de ello lo trataremos de una manera u otra.
-    csv <- parseCSVFromFile fileName
-    -- La función parseCSVFromFile es de tipo Either Text.Parsec.Error.ParseError CSV
-    -- Por lo que si no hay error, devuelve (Right x), siendo x de tipo csv.
-
-    let filas = case csv of
-            -- En caso de que no hubiera ningún error, se nos devolvería todas las líneas
-            -- de nuestro fichero csv en una lista.
-            (Right lineas) -> lineas -- [Record]
-            -- En caso contrario, devolvemos []
-            _ -> []
-
-    if null filas then 
-        putStrLn "El fichero CSV no es válido o carece de contenido"
-    else do -- Significa que es un fichero valido 
-        let cabecera = head filas -- Cabecera del fichero CSV
-        let cuerpo = tail filas -- Filas con información del CSV
-        putStrLn "Atributos de cada aplicación \n"
-        imprimeCabecera cabecera  -- Imprime la cabecera = ["app","category","rating","reviews", "size","installs","typeprice","price","contentrating","genres","lastupdated","currentversion","androidver"]
-        let aplications = traduccionRecords cabecera cuerpo
-        -- putStrLn $ show aplications -- Muestra por consola la lista aplicaciones
-        ------------------------------------------------
-        putStrLn "\n"
-        putStrLn "Las 5 categorías con mayor número de instalaciones de todas:"
-        let porcentajeCat = masPorcentaje5Categorias $ porcentajeCategorias $ listarCategorias $ obtieneLCategorias aplications
-        imprMasPorcentaje5Categorias porcentajeCat
-        ------------------------------------
-        putStrLn "\n"
-        let lPrecios = listarPrecios aplications --[Float]
-        porcAppsPago lPrecios (cantAppsPago lPrecios)
-        precMedioAplicaciones lPrecios
-        ------------------------------------
-        -- putStrLn "\n"
-        -- putStrLn "5 de las aplicaciones con más descargas: \n"
-        -- let f1 = take 5[(app x, show(installs x)++"+") | x<-appsMasInstalls aplications]
-        -- imprMasInstalls f1
-        ------------------------------------
-        ------------------------------------
-        putStrLn "\n"
-        putStrLn "Aplicación con más Reviews: \n"
-        let x = appMasReviews aplications
-        imprAPP x
-        ------------------------------------
-        ------------------------------------
-        putStrLn "\n"
-        putStrLn "La aplicación con mayor rating por categoría: "
-        let lcat = listarRating $ obtieneLCatPRating aplications
-        imprimirTablaRting lcat
-        ------------------------------------
-        putStrLn "\n Calcular la media de del rating por categoría:"
-        let lcatR = obtieneLCatPRating aplications -- obtieneLCatPRating
-        let mediasCat = listarMediaCat lcatR
-        imprimeMediaCat mediasCat
-        ------------------------------------
-        putStrLn "\n"
-        putStrLn "Tests:"
-        let x1 = listarCategorias $ obtieneLPCategorias aplications
-        let x2 = listarCategorias $ obtieneLCategorias aplications
-        let x3 = medInsPCat x2 x1
-        putStrLn "\n"
-        imprInsPCategorias x3
-        ------------------------------------
-        putStrLn " "
-
--- =====================================================================
-
-
--- FUNCIONES AUXILIARES
+-- FUNCIONES
 -- =====================================================================
 -- (imprimeCabecera xs) procesa la cabecera, imprimiendo por cada campo de la misma su número y la línea.
 -- Por ejemplo:
@@ -530,8 +446,3 @@ imprInsPCategorias :: [(String, Int)] -> IO()
 -- imprInsPCategorias tuplas= sequence_ $ map (\ (a,b) -> putStrLn $ concat $ [show a, " : ", show b]) tuplas
 imprInsPCategorias tuplas = putStrLn $ render $ P.table tabla
     where tabla = ["Categoria","Media Instalaciones"]:[[a,show b] | (a,b)<-tuplas]
-
-
--- imprimeMediaCat :: [(String, Float)] -> IO()
--- imprimeMediaCat tuplas = putStrLn $ render $ P.table tabla
---     where tabla = ["Categoria","Media Rating"]:[[a,show b] | (a,b)<-tuplas]
