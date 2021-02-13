@@ -5,12 +5,12 @@ module PTables
       table
       ) where
 
-import Text.PrettyPrint.Boxes
+import Text.PrettyPrint.Boxes as P
 import Data.List
 
 
 -- Sacado de : https://codereview.stackexchange.com/questions/171992/pretty-printed-tables-in-haskell
-
+ 
 pad width x = x ++ replicate k ' '
    where k = width - length x
 
@@ -20,7 +20,7 @@ fmt_column items = hsep // vcat left (intersperse hsep (map (text.pad width) ite
          hsep = text ( replicate width '-' )
 
 table :: [[String]] -> Box
-table rows = vsep <> hcat top (intersperse vsep (map fmt_column columns)) <> vsep
+table rows = vsep P.<> hcat top (intersperse vsep (map fmt_column columns)) P.<> vsep
    where
      columns = transpose rows
      nrows = length rows

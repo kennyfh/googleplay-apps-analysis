@@ -1,6 +1,7 @@
 import Review as R
 import Aplication as A
-import Text.CSV 
+import Text.CSV
+
 
 
 -- MAIN
@@ -121,6 +122,7 @@ reviewsdataset =  do
         putStrLn "Atributos de cada aplicación \n"
         R.imprimeCabecera cabecera  -- Imprime la cabecera = ["app","translated_Review","sentiment","sentiment_Polarity","sentiment_Subjectivity"]
         let reviews = R.traduccionRecords cabecera cuerpo
+        putStrLn $ show reviews
         --------------------------------------------
         putStrLn "\n "
         putStrLn "Cantidad de review segun una evaluación:" 
