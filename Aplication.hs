@@ -6,20 +6,19 @@
 -- =====================================================================
 
 
--- INVESTIGACIÓN DEL MERCADO UTILIZANDO ANALISIS ESTADÍSTICOS EN UN DATASET DE APLICACIONES DE GOOGLE PLAY
 
--- - METODOS QUE PODRIAMOS IMPLEMENTAR
--- 1) Numero de atributos que tiene nuestro dataset (hecho)
--- 2) Mostrar las categorías que nos encontramos en el dataset (hecho)
--- 3) Calcular la media de las instalaciones por categoría (hecho)
--- 4) Calcular las 5 aplicaciones con mejor valoración por categoría
--- 5) Porcentaje de cuantas aplicaciones son gratuita o de pago en google play (hecho)
--- 6) Aplicaciones con más descargas (Hecho, tarda casi 1,10 min)
--- 7) Aplicación con más Installs (No es concreto debido a que hay varias con más de 1 millón) (Hecho)
--- 8) Aplicación con más rewiews (Hecho)
--- 9) Porcentaje de cuantas aplicaciones son gratuita o de pago en google play (Hecho)
--- 10) Calcular la media de del rating por categoría. (Hecho)
--- 11) Calcular la media de las instalaciones por categoría (hecho)
+
+-- 1) Numero de atributos que tiene nuestro dataset.
+-- 2) Mostrar las categorías que nos encontramos en el dataset.
+-- 3) Calcular la media de las instalaciones por categoría.
+-- 4) Calcular las 5 aplicaciones con mejor valoración por categoría.
+-- 5) Porcentaje de cuantas aplicaciones son gratuita o de pago en google play.
+-- 6) Aplicaciones con más descargas.
+-- 7) Aplicación con más Installs (No es concreto debido a que hay varias con más de 1 millón).
+-- 8) Aplicación con más rewiews.
+-- 9) Porcentaje de cuantas aplicaciones son gratuita o de pago en google play.
+-- 10) Calcular la media de del rating por categoría.
+-- 11) Calcular la media de las instalaciones por categoría.
 
 module Aplication
     (Aplication,
@@ -53,11 +52,11 @@ module Aplication
 -- MODULOS UTILIZADAS
 import Text.CSV -- Implementación de csv en Haskell
 import Data.Default -- Librería que nos permite instanciar la clase Default
-import Data.List as L
+import Data.List as L -- Listas
 import Data.Ord (comparing)
 import Data.Maybe
 import Text.PrettyPrint.Boxes
-import PTables as P
+import PTables as P -- Imprimir tablas
 
 -- =====================================================================
 
@@ -400,7 +399,7 @@ imprimirTablaRting lista = putStrLn $ render $ P.table tabla
 -- =====================================================================
 -- =====================================================================
 
--- Calcular la media de del rating por categoría.
+-- 10) Calcular la media de del rating por categoría.
 
 -- (filtrarRatingCat) Dada una categoría y una lista de tuplas, nos devuelve una lista con todas las aplicaciones
 -- que tienen esa categoria
@@ -425,8 +424,8 @@ imprimeMediaCat :: [(String, Float)] -> IO()
 imprimeMediaCat tuplas = putStrLn $ render $ P.table tabla
     where tabla = ["Categoria","Media Rating"]:[[a,show b] | (a,b)<-tuplas]
 
---------
----------------------11) Calcular la media de las instalaciones por categoría 
+
+--11) Calcular la media de las instalaciones por categoría 
 -- Obtiene las tuplas [(Categoría, 1)]
 obtieneLPCategorias :: Aplications -> [(String,Int)]
 obtieneLPCategorias (app:apps)

@@ -11,7 +11,6 @@ import Text.CSV
 import Data.Char
 
 
-
 -- MAIN
 main :: IO()
 main = do
@@ -25,20 +24,23 @@ main = do
 -- (opciones op) Según el String (op) nos ejecuta las funciones que correspondan
 opciones :: String -> IO()
 opciones "1" = do
-    appsdataset
+    putStrLn "La carga completa del dataset puede tardar unos minutos"
+    appsDataset
 opciones "2" = do 
-    reviewsdataset
+    putStrLn "La carga completa del dataset puede tardar unos minutos"
+    reviewsDataset
 opciones "3" = do 
-    appsdataset
-    reviewsdataset
+    putStrLn "La carga completa de los datasets puede tardar unos minutos"
+    appsDataset
+    reviewsDataset
 opciones "4" = do
     putStrLn "Saliendo del menú...."
 opciones _  = do
     putStrLn "Lo siento, la opción no es correcta, vuelve a intentarlo"
     main
 
-appsdataset :: IO()
-appsdataset =  do
+appsDataset :: IO()
+appsDataset =  do
     -- Guardamos el nombre de nuestro dataset
     let fileName = "ejemplos/googleplaystore.csv"
     -- Analizamos nuestro fichero de entrada para ver si se trata
@@ -107,8 +109,8 @@ appsdataset =  do
 
 
 
-reviewsdataset :: IO()
-reviewsdataset =  do
+reviewsDataset :: IO()
+reviewsDataset =  do
     -- Guardamos el nombre de nuestro dataset
     let fileName = "ejemplos/googleplaystore_user_reviews_fixed.csv"
     -- Analizamos nuestro fichero de entrada para ver si se trata
@@ -146,7 +148,7 @@ reviewsdataset =  do
         --------------------------------------------
         -- 3)
         putStrLn "\n "
-        -- Housing-Real Estate & Property --> Es el mejor para hacer pruebas por el número bajo de elementos que tiene
+        -- Housing-Real Estate & Property --> Es el mejor para hacer pruebas por el número bajo de elementos que tiene (21)
         putStrLn "Por favor, introduzca un nombre de una aplicación (Por ejemplo: 11st, Adobe Acrobat Reader, Agar.io, etc)"
         
         nom <- getLine
@@ -161,17 +163,28 @@ reviewsdataset =  do
         putStrLn "\n "
         putStrLn "Por favor, seleccione un comentario poniendo el número correspondiente"
         numero<-getLine
-        if (esNumero numero) then do
+        if (all isDigit numero) then do
             let n =  read numero::Int
             -- putStrLn $ show n
-            let xsa = R.seleccionarComentario n xs
-            -- putStrLn $ show xsa
-            let asd = R.pilaPorcentajes xsa
-            putStrLn $ show asd
+            let coment = R.seleccionarComentario n xs -- comentario sin limpiar
+            putStrLn "\n"
+            putStrLn "Árbol con las 5 letras más usadas en la review \n"
+            putStrLn $ show $ arbolP coment
+            imprimeLetras coment
         else do
             error "No se puede seleccionar un comentario con un número inválido"
-        
+        -------------------------------------------
+        -- 5)
+        putStrLn "\n "
+        putStrLn "Dada las valoraciones anteriores podemos calcular la media del sentimiento subjetivo calculado en el CSV:"
+        putStrLn "\n "
+        polAverage reviews "Positive"
+        polAverage reviews "Neutral"
+        polAverage reviews "Negative"
 
--- FUNCIONES AUXILIARES:
-esNumero :: String -> Bool
-esNumero xs = all isDigit xs
+        putStrLn "\n"    
+        putStrLn $ "***********************************************************************************************************************\n" ++
+                 "* Las medias más cercanas a 0 indican que la media de comentarios no ha sido en cada caso muy positiva o muy negativa. *\n"
+                 ++"* Los valores neutros en el dataset se clasifican como 0 de ahí la media Neutral de 0.                                *\n"
+                 ++"***********************************************************************************************************************" 
+        putStrLn "\n"

@@ -2,15 +2,15 @@
 -- Kenny Jesús Flores Huamán
 -- Jesús Pineda Marquez
 -- Universidad de Sevilla
--- Sevilla, 1 febrero de 2021
+-- Sevilla, 7 febrero de 2021
 -- =====================================================================
 
-
--- - METODOS QUE PODRIAMOS IMPLEMENTAR
--- 1) Numero de atributos que tiene nuestro dataset (hecho)
--- 2) Cantidad de reviews según una evaluación (hecho)
--- 3) Devolver todas las reviews de una aplicación (hecho)
+-- 
+-- 1) Numero de atributos que tiene nuestro dataset
+-- 2) Cantidad de reviews según una evaluación
+-- 3) Devolver todas las reviews de una aplicación
 -- 4) Devolver el porcentaje de caracteres usados en un comentario 
+-- 5) Media del sentimiento subjetivo
 
 module Review
     (Review,
@@ -24,19 +24,22 @@ module Review
     obtenerReviews,
     imprimirRTraduccion,
     seleccionarComentario,
-    pilaPorcentajes
+    lPorcentajes,
+    sentPolAverage,
+    polAverage,
+    arbolP,
+    imprimeLetras
     ) where
 
 -- =====================================================================
 -- MODULOS UTILIZADAS
 import Text.CSV -- Implementación de csv en Haskell
-import Data.Default -- Librería que nos permite instanciar la clase Default
+import Data.Default -- Nos permite instanciar la clase Default
 import Data.List as L
 import Data.Ord (comparing)
 import Data.Maybe
 import Data.Array
 import Data.Char
-import PilaConTipoDeDatoAlgebraico
 
 -- =====================================================================
 
@@ -134,14 +137,14 @@ porcVal xs _ = error "Las reviews solamente pueden ser Positive, Negative o Neut
 -- =====================================================================
 -- =====================================================================
 
--- (obtenerReviews str rws) Dado el nombre de una aplicación (str) y una lista de Reviews, nos devuelve todas las aplicaciones
+-- (obtenerReviews str rws) Dado el nombre de una aplicación (str) y una lista de Reviews, nos devuelve los comentarios
 -- que son el mismo nombre que el pasado como parámetro (str). Por ejemplo:
 
 -- let x = let x = [Rev {app = "PD", translated_Review = "GreatApp", sentiment = "Negative", sentiment_Polarity = -2.5e-2, sentiment_Subjectivity = 0.125}, Rev {app = "ISLU", translated_Review = "Pathetic app.", sentiment = "Negative", sentiment_Polarity = -0.3625, sentiment_Subjectivity = 0.625}]::Reviews
 
 -- Review> obtenerReviews "PD" x
 
--- Review> [Rev {app = "PD", translated_Review = "GreatApp", sentiment = "Negative", sentiment_Polarity = -2.5e-2, sentiment_Subjectivity = 0.125}]
+-- Review> ["GreatApp"]
 
 obtenerReviews :: String -> Reviews -> [String]
 obtenerReviews str (r:rws)
@@ -160,7 +163,7 @@ imprimirRTraduccion xs = mapM_ (\ (a,b) -> putStrLn $ concat $ [show a, " : ", b
 
 -- =====================================================================
 -- =====================================================================
--- Selecciona el comentario según la posición que le indicas
+-- (seleccionarComentario pos xs) Selecciona el comentario según la posición que le indicas
 seleccionarComentario :: Int -> [String] -> String
 seleccionarComentario pos xs
     | pos > (length xs) =  error "No se puede seleccionar un comentario con un número inválido"
@@ -174,29 +177,103 @@ seleccionarComentario pos xs
 --  limpia "I like eat delicious food. That's I'm cooking food myself, case \"10 Best Foods\" helps lot, also \"Best Before (Shelf Life)\""
 -- "ilikeeatdeliciousfoodthatsimcookingfoodmyselfcasebestfoodshelpslotalsobestbeforeshelflife"
 
-
 limpia :: String -> String
-limpia str = filter (\x -> elem x abcario) $ map (\x-> toLower x) str 
+limpia str = filter (\x -> elem x abcario) $ map (\x-> toLower x) str
   where abcario = ['a'..'z']
 
 -- =====================================================================
 -- =====================================================================
-pilaPorcentajes :: String -> Pila (Char, Float)
-pilaPorcentajes xs = foldr apila vacia asd
-    where asd = zip ['a'..'z'] (frecuenciasCadena xs)
+-- (lPorcentajes xs) Dada una review traducida al inglés, devuelve una
+-- lista de pares donde el primer elemento es la letra y su segundo elemento del par
+-- es el porcentaje de cuantas veces ha aparecido en el comentario la letra del abecedario inglés
+-- Para simplificar el número de tuplas, las mayúsculas se tendrán en cuenta como si fueran minúsculas
+-- en su respectiva letra. Por ejemplo:
+
+    -- lPorcentajes "Mi personaje favorito es Grogu" == [('o',13.333334),('r',10.0),('e',10.0),('s',6.666667),('i',6.666667),('g',6.666667),('a',6.666667),('v',3.3333335),('u',3.3333335),('t',3.3333335),('p',3.3333335),('n',3.3333335),('m',3.3333335),('j',3.3333335),('f',3.3333335),('z',0.0),('y',0.0),('x',0.0),('w',0.0),('q',0.0),('l',0.0),('k',0.0),('h',0.0),('d',0.0),('c',0.0),('b',0.0)]
+
+lPorcentajes :: String -> [(Char,Float)]
+lPorcentajes xs = ordenarElementos $ zip ['a'..'z'] (porcentajeCadena xs)
+    where ordenarElementos tuplas = reverse $ sortBy (comparing (\(x,y) -> y)) tuplas --Dada una lista de tuplas, devolvemos otra lista ordenada de mayor a menor
 
 -- =====================================================================
 -- =====================================================================
-frecuenciasCadena :: String -> [Float]
-frecuenciasCadena xs = [porcentaje (ocurrencias x xs') n | x <- ['a'..'z']] 
+-- (porcentajeCadena str) Es el porcentaje de uso de cada una de las letras del abecedario inglés
+-- en nuestra cadena str. Por ejemplo:
+
+-- porcentajeCadena "Programación Declarativa" == [20.833332,0.0,8.333334,4.166667,4.166667,0.0,4.166667,0.0,8.333334,0.0,0.0,4.166667,4.166667,4.166667,4.166667,4.166667,0.0,12.5,0.0,4.166667,0.0,4.166667,0.0,0.0,0.0,0.0]
+
+porcentajeCadena :: String -> [Float]
+porcentajeCadena xs = [porcentaje (ocurrencias x xs') n | x <- ['a'..'z']] 
     where xs' = limpia xs
           n = length (xs)
+-- =====================================================================
+-- =====================================================================
+-- (ocurrencias x xs) Es el número de veces que se repite un elemento x
+-- en la lista xs. Por ejemplo:
+    --  ocurrencias 'W'  "QWERTY" == 1
 
--- =====================================================================
--- =====================================================================
 ocurrencias :: Eq a => a -> [a] -> Int
 ocurrencias x xs = length [x' | x' <- xs, x == x']
-                                                  
+-- =====================================================================
+-- =====================================================================
+-- (porcentaje s t) es el porcentaje de s sobre t. Por ejemplo:
+
+--     porcentaje 2 10 == 20.0
 
 porcentaje :: Int -> Int -> Float
 porcentaje n m = (fromIntegral n / fromIntegral m) * 100
+-- =====================================================================
+-- =====================================================================
+-- Tipo de dato Abstracto Árbol, que usaremos para mostrar por pantalla los caracteres más usados
+-- dentro de la review
+data ArbolP = H Char | HF | N (ArbolP) (ArbolP)
+  deriving Show
+-- =====================================================================
+-- =====================================================================
+-- (arbolP str) Dado un comentario, vamos a devolver un arbol con los 5 caracteres más usados
+-- dentro de la review. Por ejemplo:
+    -- arbolP "QWERTZ QWERTY DVORAK AZERTY" ==  N (H 'r') (N (H 't') (N (H 'e') (N (H 'z') (H 'y'))))
+
+arbolP :: String -> ArbolP
+arbolP str
+  | length ls == 1 = N (H (fst $ head ls)) HF
+  | otherwise = aux ls
+  where ls = take 5 $ lPorcentajes $ limpia str
+-- =====================================================================
+-- =====================================================================
+-- (aux xs) Función auxiliar para construir el arbol de la función arbolP
+aux :: [(Char,Float)] -> ArbolP
+aux (x:[]) = H (fst x)
+aux (x:xs) = N (H (fst x)) (aux xs)
+-- =====================================================================
+-- =====================================================================
+-- (imprimeLetras str) Dada una review, nos va a mostrar por pantalla los 5 caracteres más usados
+-- dentro del comentario en porcentaje. Por ejemplo:
+-- imprimeLetras "QWERTZ QWERTY DVORAK AZERTY" == Porcentajes de las letras más usadas en el comentario 
+
+--                                                 r : 16.666668
+--                                                 t : 12.5
+--                                                 e : 12.5
+--                                                 z : 8.333334
+--                                                 y : 8.333334
+
+imprimeLetras :: String -> IO()
+imprimeLetras str= do
+    putStrLn "\n"
+    putStrLn "Porcentajes de las letras más usadas en la review seleccionada: \n"
+    mapM_ (\ (a,b) -> putStrLn $ concat $ [a, " : ", show b]) t
+    where t = map (\(a,b) -> ([a],b)) $ take 5 $ lPorcentajes $ limpia str
+-- =====================================================================
+-- =====================================================================
+--5)
+-- (sentPolAverage rws str) Dada una lista de reviews y un tipo de sentimiento, nos devuelve la media de sentimientos
+-- que han tenido todas las reviews 
+sentPolAverage :: Reviews -> String -> Float
+sentPolAverage (x:xs) a
+        | null xs = res
+        | otherwise = res + sentPolAverage xs a
+        where res = if sentiment x == a then  sentiment_Polarity x else 0.0
+
+-- (polAverage xs a) Imprime por pantalla la media de un tipo de sentimiento
+polAverage :: Reviews -> String -> IO()
+polAverage xs a = putStrLn $ "El \"Sentiment\" " ++ a ++ " tiene una media en su ponderación de "++ show( sentPolAverage xs a / sum [1 | x<-xs, sentiment x == a])
