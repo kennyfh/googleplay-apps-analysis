@@ -5,6 +5,8 @@
 -- Sevilla, 1 febrero de 2021
 -- =====================================================================
 
+module Main where
+
 import Review as R
 import Aplication as A
 import Text.CSV
@@ -42,7 +44,7 @@ opciones _  = do
 appsDataset :: IO()
 appsDataset =  do
     -- Guardamos el nombre de nuestro dataset
-    let fileName = "ejemplos/googleplaystore.csv"
+    let fileName = "examples/googleplaystore.csv"
     -- Analizamos nuestro fichero de entrada para ver si se trata
     -- de un csv o no, dependiendo de ello lo trataremos de una manera u otra.
     csv <- parseCSVFromFile fileName
@@ -112,7 +114,7 @@ appsDataset =  do
 reviewsDataset :: IO()
 reviewsDataset =  do
     -- Guardamos el nombre de nuestro dataset
-    let fileName = "ejemplos/googleplaystore_user_reviews_fixed.csv"
+    let fileName = "examples/googleplaystore_user_reviews_fixed.csv"
     -- Analizamos nuestro fichero de entrada para ver si se trata
     -- de un csv o no, dependiendo de ello lo trataremos de una manera u otra.
     csv <- parseCSVFromFile fileName
